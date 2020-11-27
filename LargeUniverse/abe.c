@@ -54,10 +54,12 @@ int keygen(prv_sk ** prv, msk_p *msk, pub_p * pp, char ** attributes)
     *prv = malloc(sizeof(prv_sk));
 
     element_t r;
+    element_t k3temp;
     
     element_init_Zr(r,            (*pp) -> p);
     element_init_GT((*prv) -> k0, (*pp) -> p);
     element_init_GT((*prv) -> k1. (*pp) -> p);
+    element_init_G1(k3temp, (*pp) -> p);
 
     element_random(r);
     element_pow_zn((*prv) -> k1, (*pp) -> w, r);
@@ -65,6 +67,9 @@ int keygen(prv_sk ** prv, msk_p *msk, pub_p * pp, char ** attributes)
     element_mul((*prv) -> k0, (*prv) -> k0, (*prv) -> k1);
 
     element_pow_zn((*prv) -> k1, (*pp) -> g, r);
+
+    element_neg(k3temp, r);
+    element_pow_zn(k3temp, (*pp) -> v, k3temp);
 
     (*prv) -> k2s = g_hash_table_new(g_str_hash, g_str_equal);
     (*prv) -> k3s = g_hash_table_new(g_str_hash, g_str_equal);
@@ -86,15 +91,35 @@ int keygen(prv_sk ** prv, msk_p *msk, pub_p * pp, char ** attributes)
         element_random(r_i);
         element_from_hash(e_attr, attr, strlen(attr));
 
-        element_pow_zn()
+        element_pow_zn(k2i, (*pp) -> g, r_i);
+        
+        element_pow_zn(k3i, (*pp) -> u, e_attr);
+        element_mul(k3i, k3i, (*pp) -> h);
+        element_pow_zn(k3i, k3i, r_i);
+        element_mul(k3i, k3i, k3temp);
 
+        g_hash_table_insert((*prv) -> k2s, attribute, k2i);
+        g_hash_table_insert((*prv) -> k3s, attribute, k3i);
 
-
-
+        element_clear(e_attr);
+        element_clear(r_i);
     }
 
-
-
-
+    element_clear(k3temp);
     element_clear(r);
+
+    return 0;
+}
+
+
+int generate_policy_array(int *** arr, plc_a *tree_node)
+{
+    
+
+}
+
+
+int encrypt(csp_s ** cs, pub_p *p, )
+{
+
 }

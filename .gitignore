@@ -1,6 +1,21 @@
 # Prerequisites
 *.d
 
+*.log
+*.status
+*.sub
+*.scan
+depcomp
+install-sh
+libtool
+ltmain.sh
+missing
+ylwrap
+compile
+*.guess
+*.deps
+*.libs
+*.cache
 # Object files
 *.o
 *.ko

@@ -1,5 +1,7 @@
+#ifndef ABE_H
+#define ABE_H
+#include <pbc.h>
 #include <glib.h>
-
 struct public_keys_ser_parameter{
     char * pairing_desc;
     pairing_t p;
@@ -37,10 +39,23 @@ struct header_ser_parameter {
     GHashTable * c3s;    
 };
 
-typedef struct header_ser_parameter hsp;
+typedef struct header_ser_parameter hsp_s;
 
 struct ciphertext_ser_parameter{
     element_t c;
 };
 
-typedef struct ciphertext_ser_parameter csp;
+typedef struct ciphertext_ser_parameter csp_s;
+
+
+struct tree_node {
+	/* serialized */
+	int k;            /* one if leaf, otherwise threshold */
+	char* attr;       /* attribute string if leaf, otherwise null */
+	int label;
+    int t;
+	GPtrArray* children; /* pointers to bswabe_policy_t's, len == 0 for leaves */
+};
+
+typedef struct tree_node t_node;
+#endif
