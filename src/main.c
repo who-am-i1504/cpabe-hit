@@ -34,7 +34,12 @@ int main()
 
     printf("%s\n", p);
     t_node * node = generate_tree(p);
-    // printf("%s\n", node);
+    
+    GPtrArray * matrix;
+    matrix = generate_access_array(node);
+    print_matrix(matrix);
+    char ** rhos = generate_rhos(node);
+    print_rhos(rhos);
     printf("here\n");
     free(p);
 

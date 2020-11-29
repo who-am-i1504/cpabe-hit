@@ -2,6 +2,10 @@
 #define ABE_H
 #include <pbc.h>
 #include <glib.h>
+#include <string.h>
+#include "access.h"
+#include "pairing_util.h"
+
 struct public_keys_ser_parameter{
     char * pairing_desc;
     pairing_t p;
@@ -42,20 +46,16 @@ struct header_ser_parameter {
 typedef struct header_ser_parameter hsp_s;
 
 struct ciphertext_ser_parameter{
+    hsp_s header;
     element_t c;
 };
 
 typedef struct ciphertext_ser_parameter csp_s;
 
 
-struct tree_node {
-	/* serialized */
-	int k;            /* one if leaf, otherwise threshold */
-	char* attr;       /* attribute string if leaf, otherwise null */
-	int label;
-    int t;
-	GPtrArray* children; /* pointers to bswabe_policy_t's, len == 0 for leaves */
-};
+void setup(pub_p **pp, msk_p ** msk);
+int keygen(prv_sk ** prv, msk_p *msk, pub_p * pp, char ** attributes);
+int encrypt(csp_s ** cs, pub_p *pp, t_node* node, GPtrArray * matrix, char ** thos, element_t m);
 
-typedef struct tree_node t_node;
+
 #endif
