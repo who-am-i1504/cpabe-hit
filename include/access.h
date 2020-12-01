@@ -13,4 +13,14 @@ struct tree_node {
 
 typedef struct tree_node t_node;
 
+struct satisfied_node {
+    t_node * node;
+	GPtrArray *children;
+	GArray * satified_children;
+    int index;
+    int satified;
+	struct satisfied_node *parent;
+};
+
+typedef struct satisfied_node st_node;
 #endif

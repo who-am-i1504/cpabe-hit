@@ -68,7 +68,7 @@ t_node * base_node(int k, char *s)
     t_node * p;
     p = (t_node *)malloc(sizeof(t_node));
     p -> k = k;
-    p -> attr = s ? strdup(s) : 0;
+    p -> attr = s ? strdup(s) : NULL;
     p -> children = g_ptr_array_new();
     return p;
 }
@@ -273,12 +273,13 @@ char ** generate_rhos(t_node* policy)
             }
     }
     char ** rhos;
-    rhos = (char *)malloc(sizeof(char *)*(arr->len + 1));
+    rhos = (char **)malloc(sizeof(char *)*(arr->len + 1));
     GHashTable * hash = g_hash_table_new(g_str_hash, g_str_equal);
     for (int i = 0; i < arr->len; i ++)
     {
-        rhos[i] = g_array_index(arr, char*, i);
-        if (g_hash_table_contains(rhos[i]))
+        *(rhos + i) = g_array_index(arr, char*, i);
+        // printf("%s\n", *(rhos + i));
+        if (g_hash_table_contains(hash, *(rhos + i)))
         {
             raise_error("Invalid access policy, rhso containing identical string: %s\n", rhos[i]);
             g_ptr_array_free(arr, TRUE);
@@ -286,7 +287,7 @@ char ** generate_rhos(t_node* policy)
             g_hash_table_destroy(hash);
             return NULL;
         }
-        g_hash_table_insert(hash, rhos[i], 1);
+        g_hash_table_insert(hash, *(rhos + i), 1);
     }
     *(rhos + arr -> len) = NULL;
     g_hash_table_destroy(hash);
@@ -301,49 +302,172 @@ void print_rhos(char ** rhos)
         printf("%s\n", *(rhos ++));
 }
 
-element_t* evaluate(pairing_t p, element_t x, int degree, element_t* coef)
+void free_tree_node (t_node * root)
 {
-    element_t *result;
-    element_t temp;
-    result = malloc(sizeof(element_t));
-    element_init_Zr(*result, p);
-    element_init_Zr(temp, p);
-
-    element_set0(result);
-    element_set1(temp);
-
-    for (int i = 0; i < degree + 1; i ++)
+    if (root == NULL)return;
+    if (root -> attr != NULL) free(root->attr); 
+    for (int i = 0; i < root -> children -> len; i ++)
     {
-        for (int j = 0; j < i; j ++)
-        {
-            element_mul(temp, temp, x);
-        }
-
-        element_mul(temp, temp, *(coef + i));
-        element_add(*result, *result, temp);
-        element_set1(temp);
+        free_tree_node(root -> children -> pdata[i]);
     }
-
-    element_clear(temp);
-
-    return result;
+    g_ptr_array_free(root -> children, FALSE);
+    free(root);
 }
 
-element_t *generate_coef(pairing_t p, int degree, element_t zero_value)
+st_node *pack_t_node(t_node * root, st_node * parent, int index)
 {
-    element_t *res;
-
-    res = malloc(sizeof(element_t) * (degree + 1));
-
-    element_init_Zr(*res, p);
-
-    element_set(*res, zero_value);
-
-    for (int i = 0; i < degree + 1; i ++)
+    st_node * res;
+    res = malloc(sizeof(st_node));
+    res -> node = root;
+    res -> index = index;
+    res -> children = g_ptr_array_new();
+    res -> satified = 0;
+    res -> parent = parent;
+    for (int i = 0; i < root -> children -> len; i ++)
     {
-        element_init_Zr(*(res + i), p);
-        element_random(*(res + i));
+        g_ptr_array_add(res -> children, 
+            pack_t_node(root -> children -> pdata[i], res, i + 1));
+    }
+    return res;
+}
+
+void free_st_node (st_node * root)
+{
+    if (root == NULL)return;
+
+    for (int i = 0; i < root -> children -> len; i ++)
+    {
+        free_st_node(root -> children -> pdata[i]);
+    }
+    g_ptr_array_free(root -> children, FALSE);
+    free(root);
+}
+
+int satify_node(st_node *root, char **attributes)
+{
+    if (root == NULL)return;
+    int satified = 0;
+    if (root -> node -> attr == NULL)
+    {
+        
+        root -> satified_children = g_array_new(0, 1, sizeof(int));
+
+        for (int i = 0; i < root -> children -> len; i ++)
+        {
+            if (satify_node(root -> children -> pdata[i], attributes))
+            {
+                g_array_append_val(root -> satified_children, i);
+                satified ++;
+            }
+        }
+
+        root -> satified = satified >= root -> node -> k? 1 : 0;
+
+    }
+    else
+    {
+        char ** attrs = attributes;
+        while(*attrs)
+        {
+            // printf("node-attr:\t%s\t%s\t%d\n", *attrs, root -> node -> attr, strcmp(*attrs, root -> node -> attr));
+            if (strcmp(*(attrs++), root -> node -> attr) == 0)
+            {
+                satified ++;
+                // TODO: 计算属性值乘积
+                root -> satified = 1;
+                break;
+            }
+        }
+
     }
 
-    return res;
+    return root -> satified;
+}
+
+void 
+calcoefficients(pairing_t p, GHashTable * map, st_node *root)
+{
+    if (root == NULL) return ;
+    if (root -> node -> attr == NULL && root -> satified)
+    {
+        for (int i = 0; i < root -> children -> len; i ++)
+        {
+            calcoefficients(p, map, root -> children -> pdata[i]);
+        }
+    }
+    else
+    {
+        if (!root -> satified)
+            return ;
+        element_t *e;
+        e = malloc(sizeof(element_t));
+
+        element_init_Zr(*e, p);
+
+        element_set1(*e);
+        st_node* current = root;
+        while(current -> parent != NULL)
+        {
+            int current_node_index = current -> index;
+            current = current -> parent;
+            element_t * coefficient_element ;
+            coefficient_element = calcoef(p, current -> satified_children, current_node_index);
+            element_mul_zn(*e, *coefficient_element, *e);
+            element_clear(*coefficient_element);
+            free(coefficient_element);
+        }
+        g_hash_table_insert(map, root -> node -> attr, e);
+    }
+    
+}
+
+GHashTable * 
+calcoeficient(pairing_t p, st_node * root, char ** attributes)
+{
+    if (!satify_node(root, attributes))
+    {
+        raise_error("Give attributes set does noet satify access policy.");
+        return NULL;
+    }
+    GHashTable * map;
+    map = g_hash_table_new(g_str_hash, g_str_equal);
+    calcoefficients(p, map, root);
+    return map;
+}
+
+GHashTable * 
+reconstruct_omegas(pairing_t p, char ** attributes, t_node *root)
+{
+    GHashTable * collision_map;
+    collision_map = g_hash_table_new(g_str_hash, g_str_equal);
+
+    for (char ** p = attributes; *p != NULL; p ++)
+    {
+        // printf("attributes is:\t%s\n", *p);
+        if (g_hash_table_contains(collision_map, *p))
+        {
+            raise_error("Invalid attribute set, contains identical attribute: %s\n", *p);
+            g_hash_table_destroy(collision_map);
+            return NULL;
+        }
+        g_hash_table_insert(collision_map, *p, *p);
+    }
+    g_hash_table_destroy(collision_map);
+
+    st_node * node = pack_t_node(root, NULL, 0);
+
+    return calcoeficient(p, node, attributes);
+}
+
+void free_hash_value_element(GHashTable * map)
+{
+    GList * list;
+    list = g_hash_table_get_values(map);
+    for (GList * p = list; p != NULL; p ++)
+    {
+        element_clear(*((element_t *)(p -> data)));
+        free(p -> data);
+    }
+    g_list_free(list);
+    g_hash_table_destroy(map);
 }

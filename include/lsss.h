@@ -5,6 +5,7 @@
 #include <pbc.h>
 #include <glib.h>
 #include "access.h"
+#include "pairing_util.h"
 
 void raise_error(char* fmt, ...);
 GString * string_policy_format(char * policy);
@@ -16,6 +17,13 @@ void print_matrix(GPtrArray * matrix);
 char ** generate_rhos(t_node * policy);
 void print_rhos(char **rhos);
 
-element_t* evaluate(pairing_t p, element_t x, int degree, element_t *coef);
-element_t* generate_coef(pairing_t p, int degree, element_t zero_value);
+
+void free_tree_node(t_node * root);
+
+st_node * pack_t_node(t_node * root, st_node * parent, int index);
+void free_st_node (st_node * root);
+int satify_node(st_node *root, char **attributes);
+void calcoefficients(pairing_t p, GHashTable * map, st_node *root);
+GHashTable * calcoeficient(pairing_t p, st_node * root, char ** attributes);
+GHashTable * reconstruct_omegas(pairing_t p, char ** attributes, t_node *root);
 #endif

@@ -102,7 +102,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_main_OBJECTS = main.$(OBJEXT) common.$(OBJEXT) lsss.$(OBJEXT) \
-	policy_lang.$(OBJEXT)
+	policy_lang.$(OBJEXT) abe.$(OBJEXT) pairing_util.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_$(V))
@@ -124,8 +124,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/common.Po ./$(DEPDIR)/lsss.Po \
-	./$(DEPDIR)/main.Po ./$(DEPDIR)/policy_lang.Po
+am__depfiles_remade = ./$(DEPDIR)/abe.Po ./$(DEPDIR)/common.Po \
+	./$(DEPDIR)/lsss.Po ./$(DEPDIR)/main.Po \
+	./$(DEPDIR)/pairing_util.Po ./$(DEPDIR)/policy_lang.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -294,7 +295,7 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AUTOMAKE_OPTIONS = foreign
-main_SOURCES = main.c common.c lsss.c policy_lang.c
+main_SOURCES = main.c common.c lsss.c policy_lang.c abe.c pairing_util.c
 INCLUDES = -I../include -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/pbc -I/usr/local/include/pbc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -405,9 +406,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/abe.Po # am--include-marker
 include ./$(DEPDIR)/common.Po # am--include-marker
 include ./$(DEPDIR)/lsss.Po # am--include-marker
 include ./$(DEPDIR)/main.Po # am--include-marker
+include ./$(DEPDIR)/pairing_util.Po # am--include-marker
 include ./$(DEPDIR)/policy_lang.Po # am--include-marker
 
 $(am__depfiles_remade):
@@ -570,9 +573,11 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/common.Po
+		-rm -f ./$(DEPDIR)/abe.Po
+	-rm -f ./$(DEPDIR)/common.Po
 	-rm -f ./$(DEPDIR)/lsss.Po
 	-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/pairing_util.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -619,9 +624,11 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/common.Po
+		-rm -f ./$(DEPDIR)/abe.Po
+	-rm -f ./$(DEPDIR)/common.Po
 	-rm -f ./$(DEPDIR)/lsss.Po
 	-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/pairing_util.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

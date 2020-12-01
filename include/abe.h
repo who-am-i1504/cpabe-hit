@@ -3,6 +3,7 @@
 #include <pbc.h>
 #include <glib.h>
 #include <string.h>
+#include "lsss.h"
 #include "access.h"
 #include "pairing_util.h"
 
@@ -28,7 +29,7 @@ typedef struct master_secret_key_ser_parameter msk_p;
 struct secret_key_ser_parameter {
     element_t k0;
     element_t k1;
-    
+    char **attribute;
     GHashTable * k2s;
     GHashTable * k3s;
 };
@@ -46,16 +47,21 @@ struct header_ser_parameter {
 typedef struct header_ser_parameter hsp_s;
 
 struct ciphertext_ser_parameter{
-    hsp_s header;
+    char ** rhos;
+    element_t c0;
+    GHashTable * c1s;
+    GHashTable * c2s;
+    GHashTable * c3s;
     element_t c;
+    char *policy;
 };
 
 typedef struct ciphertext_ser_parameter csp_s;
 
 
+
 void setup(pub_p **pp, msk_p ** msk);
 int keygen(prv_sk ** prv, msk_p *msk, pub_p * pp, char ** attributes);
-int encrypt(csp_s ** cs, pub_p *pp, t_node* node, GPtrArray * matrix, char ** thos, element_t m);
-
-
+int encrypt(csp_s **cs, pub_p * pp, char *policy, element_t m);
+int decryption(element_t **m, pub_p *pp, prv_sk *prv, csp_s *cs);
 #endif
