@@ -56,7 +56,7 @@ int keygen(prv_sk ** prv, msk_p *msk, pub_p * pp, char ** attributes)
     element_init_Zr(r,            pp -> p);
     element_init_G1((*prv) -> k0, pp -> p);
     element_init_G1((*prv) -> k1, pp -> p);
-    element_init_G1(k3temp, pp -> p);
+    element_init_G1(k3temp,       pp -> p);
 
     element_random(r);
     element_pow_zn((*prv) -> k1, pp -> w, r);
@@ -334,7 +334,7 @@ int decryption(element_t **m, pub_p *pp, prv_sk *prv, csp_s *cs)
         k2 = g_hash_table_lookup(prv -> k2s, p -> data);
         c3 = g_hash_table_lookup(cs -> c3s, p -> data);
         k3 = g_hash_table_lookup(prv -> k3s, p -> data);
-        printf("%s\n", p -> data);
+        // printf("%s\n", p -> data);
 
         element_t * lambda = g_hash_table_lookup(omegas_map, p -> data);
 
