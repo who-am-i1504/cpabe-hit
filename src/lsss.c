@@ -25,7 +25,6 @@ raise_error(char* fmt, ...)
 #endif
 }
 
-
 GString * string_policy_format(char * policy)
 {
     GString * str;
@@ -470,4 +469,14 @@ void free_hash_value_element(GHashTable * map)
     }
     g_list_free(list);
     g_hash_table_destroy(map);
+}
+
+int hash(char ** res, char *attr)
+{
+    *res = malloc(sizeof(char) * SHA256_DIGEST_LENGTH);
+    SHA256_CTX x;
+    SHA256_Init(&x);
+    SHA256_Update(&x, attr, strlen(attr));
+    SHA256_Final(*res, &x);
+    return 0;
 }

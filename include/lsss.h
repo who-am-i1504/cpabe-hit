@@ -4,6 +4,8 @@
 #include <string.h>
 #include <pbc.h>
 #include <glib.h>
+#include <openssl/aes.h>
+#include <openssl/sha.h>
 #include "access.h"
 #include "pairing_util.h"
 
@@ -26,4 +28,5 @@ int satify_node(st_node *root, char **attributes);
 void calcoefficients(pairing_t p, GHashTable * map, st_node *root);
 GHashTable * calcoeficient(pairing_t p, st_node * root, char ** attributes);
 GHashTable * reconstruct_omegas(pairing_t p, char ** attributes, t_node *root);
+int hash(char **res, char *attr);
 #endif

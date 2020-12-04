@@ -62,25 +62,26 @@ void access_tree_node_secret_sharing(pairing_t p, element_t root_secret, t_node 
 {
     if (node -> attr == NULL)
     {
+        element_t *mid;
+        mid = generate_coef(p, node->k, root_secret);
         for (int i = 0; i < node -> children -> len; i ++)
         {
             element_t* e;
             element_t x;
-            element_t *mid;
             // element_printf("root_secret is : %B\n", root_secret);
-            mid = generate_coef(p, node->k, root_secret);
             element_init_Zr(x, p);
             element_set_si(x, i + 1);
             e = evaluate(p, x, 
                 node -> k, mid);
             // element_printf("root_children_secret is : %B\n", *e);
-            element_destory(mid, node -> k);
+            
             access_tree_node_secret_sharing(p,
                 *e, (t_node *)(node -> children -> pdata[i]), map);
             element_clear(x);
             element_clear(*e);
             free(e);
         }
+        element_destory(mid, node -> k);
     }
     else
     {
@@ -90,6 +91,8 @@ void access_tree_node_secret_sharing(pairing_t p, element_t root_secret, t_node 
         element_init_Zr(*e, p);
         element_set(*e, root_secret);
         g_hash_table_insert(map, node -> attr, e);
+        // printf("\t%s\t", node -> attr);
+        // element_printf("%B\n", *e);
         // element_printf("labdas is : %B\n", root_secret);
     }
     
@@ -122,7 +125,10 @@ element_t * map_string_to_group(pairing_t p, char *message, int type)
     }
 
     // element_random(*res);
-    element_from_hash(*res, message, strlen(message));
+    char *hash_code;
+    hash(&hash_code, message);
+    element_from_hash(*res, hash_code, strlen(hash_code));
+    free(hash_code);
 
     return res;
 }

@@ -46,6 +46,7 @@ int main()
 
     char *attributes[] = {
         "sysadmin",
+        "hire_date = 2800",
         "security_team",
         "executive_level = 100",
         "audit_group",
