@@ -101,8 +101,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_main_OBJECTS = main.$(OBJEXT) common.$(OBJEXT) lsss.$(OBJEXT) \
-	policy_lang.$(OBJEXT) abe.$(OBJEXT) pairing_util.$(OBJEXT)
+am_main_OBJECTS = main.$(OBJEXT) common.$(OBJEXT) \
+	policy_lang.$(OBJEXT) policy.$(OBJEXT) core.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -124,9 +124,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/abe.Po ./$(DEPDIR)/common.Po \
-	./$(DEPDIR)/lsss.Po ./$(DEPDIR)/main.Po \
-	./$(DEPDIR)/pairing_util.Po ./$(DEPDIR)/policy_lang.Po
+am__depfiles_remade = ./$(DEPDIR)/common.Po ./$(DEPDIR)/core.Po \
+	./$(DEPDIR)/main.Po ./$(DEPDIR)/policy.Po \
+	./$(DEPDIR)/policy_lang.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -295,7 +295,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-main_SOURCES = main.c common.c lsss.c policy_lang.c abe.c pairing_util.c
+main_SOURCES = main.c common.c policy_lang.c policy.c universe/core.c
 INCLUDES = -I../include -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/pbc -I/usr/local/include/pbc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -406,11 +406,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/abe.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsss.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/core.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pairing_util.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy_lang.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -439,6 +438,20 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+core.o: universe/core.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT core.o -MD -MP -MF $(DEPDIR)/core.Tpo -c -o core.o `test -f 'universe/core.c' || echo '$(srcdir)/'`universe/core.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/core.Tpo $(DEPDIR)/core.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='universe/core.c' object='core.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o core.o `test -f 'universe/core.c' || echo '$(srcdir)/'`universe/core.c
+
+core.obj: universe/core.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT core.obj -MD -MP -MF $(DEPDIR)/core.Tpo -c -o core.obj `if test -f 'universe/core.c'; then $(CYGPATH_W) 'universe/core.c'; else $(CYGPATH_W) '$(srcdir)/universe/core.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/core.Tpo $(DEPDIR)/core.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='universe/core.c' object='core.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o core.obj `if test -f 'universe/core.c'; then $(CYGPATH_W) 'universe/core.c'; else $(CYGPATH_W) '$(srcdir)/universe/core.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -573,11 +586,10 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/abe.Po
-	-rm -f ./$(DEPDIR)/common.Po
-	-rm -f ./$(DEPDIR)/lsss.Po
+		-rm -f ./$(DEPDIR)/common.Po
+	-rm -f ./$(DEPDIR)/core.Po
 	-rm -f ./$(DEPDIR)/main.Po
-	-rm -f ./$(DEPDIR)/pairing_util.Po
+	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -624,11 +636,10 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/abe.Po
-	-rm -f ./$(DEPDIR)/common.Po
-	-rm -f ./$(DEPDIR)/lsss.Po
+		-rm -f ./$(DEPDIR)/common.Po
+	-rm -f ./$(DEPDIR)/core.Po
 	-rm -f ./$(DEPDIR)/main.Po
-	-rm -f ./$(DEPDIR)/pairing_util.Po
+	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
