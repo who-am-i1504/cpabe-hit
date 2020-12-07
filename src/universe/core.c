@@ -140,6 +140,16 @@ void enc_func( bswabe_policy_t* p,
                bswabe_pub_t* pub, 
 			   bswabe_cph_t* cph )
 {
+	/*
+	element_t * c1i;
+	p->cph = cph;
+	c1i = malloc(sizeof(element_t));
+	element_init_Zr(*c1i, pub->p);
+	element_set(*c1i, p->q->coef[0]);
+	g_hash_table_insert(cph -> c1, p -> attr, c1i);
+	element_printf("%s\t%B\n", p -> attr, p->q->coef[0]);
+	*/
+	
 	element_t r;
 	element_t t;
 	element_t h;
@@ -213,6 +223,7 @@ bswabe_enc( bswabe_pub_t* pub, element_t m, char* policy )
  	element_random(m);
 	// secret s
  	element_random(s);
+	// element_printf("%B\n", s);
     // (e(g,g) ^ alpha) ^ s
 	element_pow_zn(cph->cs, pub->egg_alpha, s);
 	// m * ((e(g,g) ^ alpha) ^ s)
@@ -235,7 +246,15 @@ dec_leaf_flatten( element_t r,
 				  bswabe_prv_t* prv, 
 				  bswabe_pub_t* pub )
 {
-	// bswabe_prv_comp_t* c;
+	/*element_t *c1;
+	element_t m;
+	element_init_Zr(m, pub -> p);
+	c1 = g_hash_table_lookup(((bswabe_cph_t*)(p -> cph)) -> c1, p -> attr);
+	element_mul(m, *c1, exp);
+	element_add(r, r, m);
+	element_clear(m);
+	element_printf("%B\n", r);
+	/*/
 	element_t s;
 	element_t t;
 	element_t *k2;
@@ -250,8 +269,7 @@ dec_leaf_flatten( element_t r,
 	c1 = g_hash_table_lookup(((bswabe_cph_t*)(p -> cph)) -> c1, p -> attr);
 	c2 = g_hash_table_lookup(((bswabe_cph_t*)(p -> cph)) -> c2, p -> attr);
 	c3 = g_hash_table_lookup(((bswabe_cph_t*)(p -> cph)) -> c3, p -> attr);
-
-	// c = &(g_array_index(prv->comps, bswabe_prv_comp_t, p->attri));
+	
 
 	element_init_GT(s, pub->p);
 	element_init_GT(t, pub->p);
@@ -278,6 +296,7 @@ bswabe_dec( bswabe_pub_t* pub,
 			bswabe_cph_t* cph, 
 			element_t m )
 {
+	int ret = 0;
 	element_t t;
 
 	element_init_GT(m, pub->p);
@@ -287,20 +306,13 @@ bswabe_dec( bswabe_pub_t* pub,
 	if( !cph->p->satisfiable )
 	{
 		raise_error("cannot decrypt, attributes in key do not satisfy policy\n");
-		return 0;
+		ret = 1;
+		goto bswabe_dec_destory;
 	}
 
-/* 	if( no_opt_sat ) */
-/* 		pick_sat_naive(cph->p, prv); */
-/* 	else */
 	pick_sat_min_leaves(cph->p);
-
-/* 	if( dec_strategy == DEC_NAIVE ) */
-/* 		dec_naive(t, cph->p, prv, pub); */
-/* 	else if( dec_strategy == DEC_FLATTEN ) */
 	dec_flatten(t, cph->p, prv, pub, pub -> p, dec_leaf_flatten);
-/* 	else */
-/* 		dec_merge(t, cph->p, prv, pub); */
+	
 
 	element_t session_key;
 	element_init_GT(session_key, pub -> p);
@@ -311,12 +323,9 @@ bswabe_dec( bswabe_pub_t* pub,
 
 	element_invert(session_key, session_key);
 	element_mul(m, cph -> cs, session_key);
-	// 原代码
-	// element_mul(m, cph->cs, t); /* num_muls++; */
-
-	// pairing_apply(t, cph->c, prv->d, pub->p); /* num_pairings++; */
-	// element_invert(t, t);
-	// element_mul(m, m, t); /* num_muls++; */
-
-	return 1;
+	
+bswabe_dec_destory:
+	// element_clear(m);
+	element_clear(t);
+	return ret;
 }

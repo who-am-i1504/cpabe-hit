@@ -398,8 +398,22 @@ dec_flatten( element_t r,
 
 	element_set1(one);
 	element_set1(r);
+	// element_set0(r);
 
 	dec_node_flatten(r, one, p, prv, pub, leaf_func);
 
 	element_clear(one);
+}
+
+void free_polynomial(bswabe_polynomial_t * q)
+{
+	for (int i = 0; i < sizeof(q) / sizeof(bswabe_polynomial_t); i ++)
+	{
+		for (int j = 0; j < (q + i) -> deg; j ++)
+		{
+			element_clear(*(element_t *) ((q + i) -> coef[j]));
+			free((q + i) -> coef[j]);
+		}
+	}
+	free(q);
 }

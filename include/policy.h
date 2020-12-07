@@ -64,5 +64,5 @@ void lagrange_coef( element_t r, GArray* s, int i );
 void dec_internal_flatten( element_t r, element_t exp, bswabe_policy_t* p, void* prv, void* pub, dec_leaf leaf_func);
 void dec_node_flatten( element_t r, element_t exp, bswabe_policy_t* p, void* prv, void* pub, dec_leaf leaf_func);
 void dec_flatten( element_t r, bswabe_policy_t* p, void* prv, void* pub, pairing_t pair, dec_leaf leaf_func);
-
+void free_polynomial(bswabe_polynomial_t * q);
 #endif
