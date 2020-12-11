@@ -4,6 +4,11 @@
 #include <glib.h>
 #include <openssl/sha.h>
 #include <assert.h>
+#include <openssl/bn.h>
+#define MAX_PARAMS_LENGTH 2046
+#ifndef NUM_PRIMES
+#define NUM_PRIMES 3
+#endif
 
 typedef struct
 {
@@ -43,6 +48,7 @@ typedef void (*enc_detail)( bswabe_policy_t* p,
 			                void* cph );
 char* bswabe_error();
 void raise_error(char* fmt, ...);
+char * generate_a1_params(int lambda);
 void element_from_string( element_t h, char* s );
 
 bswabe_policy_t* base_node( int k, char* s );

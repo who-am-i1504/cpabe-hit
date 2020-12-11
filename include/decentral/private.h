@@ -3,7 +3,6 @@
 #include <pbc.h>
 #include <glib.h>
 #include "policy.h"
-#define MAX_PARAMS_LENGTH 2046
 
 typedef struct {
     char *pairing_desc;

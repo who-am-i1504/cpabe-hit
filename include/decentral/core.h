@@ -1,11 +1,6 @@
 #ifndef DECENTRAL_CORE_H
 #define DECENTRAL_CORE_H
 #include "private.h"
-#include <openssl/bn.h>
-#ifndef NUM_PRIMES
-#define NUM_PRIMES 3
-#endif
-char * generate_a1_params(int lambda);
 int global_setup(dcen_global_param **pub, int lambda);
 dcen_authority_keys* authority_setup(dcen_global_param* pub, char *auth_id, char ** attributes);
 dcen_personal_single_key* keygen(char *uid, char *attribute, dcen_secret_t* sk, dcen_global_param * pub);
