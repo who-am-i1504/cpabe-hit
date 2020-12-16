@@ -47,7 +47,7 @@ typedef struct {
     element_t k1;           // k'_ij
     element_t k2;           // k''_ij
     element_t *k3;          
-    GHashTable *ko;
+    GHashTable *ks;
 
 } arcp_prv_t;
 

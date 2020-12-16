@@ -15,7 +15,13 @@
 #ifndef FGADR_ATTRIBUTE_NOTHING_KEY
 #define FGADR_ATTRIBUTE_NOTHING_KEY "attribute-revocation-list-no-user"
 #endif
-
+/**
+ * @description: generate the random vector
+ * @param {n}   the vectore contains n element
+ * @param {p}   the multiMap params
+ * @param {type} the element belong to 
+ * @return {bswabe_polynomial_t*} the pointer of the vector
+ */
 bswabe_polynomial_t *
 vector_init_random(int n, pairing_t p, element_type type)
 {
@@ -27,24 +33,26 @@ vector_init_random(int n, pairing_t p, element_type type)
     {
         switch (type)
         {
-        case G1:
-            element_init_G1(res -> coef[i], p);
-            break;
-        case Zr:
-            element_init_Zr(res -> coef[i], p);
-            break;
-        case GT:
-            element_init_GT(res -> coef[i], p);
-            break;
-        
-        default:
-            break;
+            case G1:
+                element_init_G1(res -> coef[i], p);
+                break;
+            case Zr:
+                element_init_Zr(res -> coef[i], p);
+                break;
+            case GT:
+                element_init_GT(res -> coef[i], p);
+                break;
         }
         element_random(res -> coef[i]);
     }
     return res;
 }
-
+/**
+ * @description: initital the vector
+ * @param {n} the number of the vector
+ * @param {e} set the element of vector to e
+ * @return {bswabe_polynomial_t*} the pointor of vector
+ */
 bswabe_polynomial_t*
 vector_init(int n, element_t e)
 {
@@ -62,7 +70,12 @@ vector_init(int n, element_t e)
 
     return res;
 }
-
+/**
+ * @description: initial the vector x1
+ * @param {rx} the first element of vector
+ * @param {rz} the third element of vector
+ * @return {bswabe_polynomial_t*} the pointor of vector
+ */
 bswabe_polynomial_t*
 vector_init_x1(element_t rx, element_t rz)
 {
@@ -83,7 +96,12 @@ vector_init_x1(element_t rx, element_t rz)
 
     return res;
 }
-
+/**
+ * @description: initial the vector x2
+ * @param {ry} the second element of vector
+ * @param {rz}  the third element of vector
+ * @return {bswabe_polynomial_t*}   the pointor of vector
+ */
 bswabe_polynomial_t*
 vector_init_x2(element_t ry, element_t rz)
 {
@@ -104,7 +122,13 @@ vector_init_x2(element_t ry, element_t rz)
 
     return res;
 }
-
+/**
+ * @description: initial the vector x3 (-ry*rz, -rx*rz, rx*ry)
+ * @param {rx}
+ * @param {ry}
+ * @param {rz}
+ * @return {bswabe_polynomial_t*}
+ */
 bswabe_polynomial_t*
 vector_init_x3(element_t rx, element_t ry, element_t rz)
 {
@@ -128,6 +152,13 @@ vector_init_x3(element_t rx, element_t ry, element_t rz)
     return res;
 }
 
+/**
+ * @description: mul1 * mul2 -> out
+ * @param {out} the result
+ * @param {mul1}
+ * @param {mul2}
+ * @return 
+ */
 void 
 vector_mul_out(bswabe_polynomial_t * out, 
                bswabe_polynomial_t* mul1, 
@@ -139,6 +170,13 @@ vector_mul_out(bswabe_polynomial_t * out,
     }
 }
 
+/**
+ * @description: vector mul1 * element e
+ * @param {out} the result
+ * @param {mul1} the vector
+ * @param {e}
+ * @return {*}
+ */
 void 
 vector_mul_element(bswabe_polynomial_t * out, 
                bswabe_polynomial_t* mul1, 
@@ -150,6 +188,11 @@ vector_mul_element(bswabe_polynomial_t * out,
     }
 }
 
+/**
+ * @description: generate the copy of the vector
+ * @param {x}   vector
+ * @return {bswabe_polynomial_t*} the copy
+ */
 bswabe_polynomial_t *
 vector_duplicate(bswabe_polynomial_t* x)
 {
@@ -165,14 +208,21 @@ vector_duplicate(bswabe_polynomial_t* x)
     return res;
 }
 
+/**
+ * @description: vector add1 + vector add2
+ * @param {out} the result
+ * @param {add1}
+ * @param {add2}
+ * @return {*}
+ */
 void 
 vector_add_out(bswabe_polynomial_t * out, 
-               bswabe_polynomial_t* mul1, 
-               bswabe_polynomial_t * mul2)
+               bswabe_polynomial_t* add1, 
+               bswabe_polynomial_t * add2)
 {
     for (int i = 0; i < out->deg; i ++)
     {
-        element_add(out -> coef[i], mul1 -> coef[i], mul2 -> coef[i]);
+        element_add(out -> coef[i], add1 -> coef[i], add2 -> coef[i]);
     }
 }
 
@@ -195,6 +245,13 @@ vector_mul(bswabe_polynomial_t * x1, bswabe_polynomial_t* x2)
     return res;
 }
 
+/**
+ * @description: the result of (mul1 . mul2)
+ * @param {res} the result
+ * @param {mul1}
+ * @param {mul2}
+ * @return 
+ */
 void 
 vector_inner_mul_out(element_t res,
                      bswabe_polynomial_t * mul1,
@@ -209,6 +266,23 @@ vector_inner_mul_out(element_t res,
         element_add(res, res, t);
     }
     element_clear(t);
+}
+
+/**
+ * @description: g^v . g^w
+ * @param {out} the result
+ * @param {x1} g^v
+ * @param {x2} g^w
+ * @return
+ */
+
+void
+vector_inner_base_out(bswabe_polynomial_t * out, 
+                      bswabe_polynomial_t * x1,
+                      bswabe_polynomial_t * x2)
+{
+    for (int i = 0; i < x1 -> deg; i ++)
+        element_mul(out -> coef[i], x1 -> coef[i], x2 -> coef[i]);
 }
 
 bswabe_polynomial_t*
@@ -229,7 +303,13 @@ vector_add(bswabe_polynomial_t * x1, bswabe_polynomial_t* x2)
     vector_add_out(res, x1, x2);
     return res;
 }
-
+/**
+ * @description: e ^ v
+ * @param {out} the result
+ * @param {x} vector
+ * @param {e}
+ * @return 
+ */
 void
 vector_pow_base(bswabe_polynomial_t* out, 
                 bswabe_polynomial_t* x, 
@@ -239,6 +319,12 @@ vector_pow_base(bswabe_polynomial_t* out,
         element_pow_zn(out -> coef[i], e, x -> coef[i]);
 }
 
+/**
+ * @description: the copy of e ^ x
+ * @param {x} vector
+ * @param {e}
+ * @return {bswabe_polynomial_t *}
+ */
 
 bswabe_polynomial_t*
 vector_pow_base_new(bswabe_polynomial_t *x, element_t e)
@@ -254,6 +340,14 @@ vector_pow_base_new(bswabe_polynomial_t *x, element_t e)
     return res;
 }
 
+/**
+ * @description: e(x, y)
+ * @param {r} the result
+ * @param {mul1}
+ * @param {mul2}
+ * @param {p}   the Group 
+ * @return {*}
+ */
 void vector_e_mul(element_t r, 
                   bswabe_polynomial_t *mul1, 
                   bswabe_polynomial_t * mul2,
@@ -277,6 +371,13 @@ void printf_vector(bswabe_polynomial_t * p)
         element_printf("%B\n", p -> coef[i]);
 }
 
+/**
+ * @description: generate the PP and MSK
+ * @param {pub}
+ * @param {msk}
+ * @param {N}
+ * @return
+ */
 void 
 arcp_setup(arcp_pub_t **pub, 
            arcp_msk_t ** msk, 
@@ -288,7 +389,7 @@ arcp_setup(arcp_pub_t **pub,
     (*msk) = malloc(sizeof(arcp_msk_t));
 
     (*pub) -> pairing_desc = strdup(TYPE_A_PARAMS);
-    (*pub) -> m = (int)sqrt((double)N) + 1;
+    (*pub) -> m = (int)sqrt((double)N);
     (*msk) -> m = (*pub) -> m;
     (*msk) -> ctr = 0;
 
@@ -322,8 +423,9 @@ arcp_setup(arcp_pub_t **pub,
 
     for (int i = 0; i < (*pub) -> m; i++)
     {
-        element_init_G1((*pub) -> fs[i], (*pub) -> p);
         element_init_GT((*pub) -> egg_alpha[i], (*pub) -> p);
+
+        element_init_G1((*pub) -> fs[i], (*pub) -> p);
         element_init_G1((*pub) -> gr[i], (*pub) -> p);
         element_init_G1((*pub) -> gz[i], (*pub) -> p);
         element_init_G1((*pub) -> gc[i], (*pub) -> p);
@@ -332,10 +434,10 @@ arcp_setup(arcp_pub_t **pub,
         element_init_Zr((*msk) -> r[i], (*pub) -> p);
         element_init_Zr((*msk) -> c[i], (*pub) -> p);
 
+        element_random(z);
         element_random((*msk) -> alpha[i]);
         element_random((*msk) -> r[i]);
         element_random((*msk) -> c[i]);
-        element_random(z);
         element_random((*pub) -> fs[i]);
 
         element_pow_zn((*pub) -> egg_alpha[i], egg, (*msk) -> alpha[i]);
@@ -349,15 +451,21 @@ arcp_setup(arcp_pub_t **pub,
     element_clear(z);
 }
 
-
+/**
+ * @description: generate the private key of user
+ * @param {pub} PP
+ * @param {msk} MSK
+ * @param {attributes} the attributes of user
+ * @return {arcp_prv_t*} private key
+ */
 arcp_prv_t *
 arcp_keygen(arcp_pub_t *pub,
             arcp_msk_t *msk,
             char **attributes)
 {
     arcp_prv_t * prv;
-    element_t delta;
-    element_t deltax;
+    element_t delta_ij;
+    element_t delta_ij_x;
     element_t mul;
     element_t attr_zr;
     prv = malloc(sizeof(arcp_prv_t));
@@ -367,16 +475,18 @@ arcp_keygen(arcp_pub_t *pub,
     prv -> j = prv -> j == 0?pub -> m:prv->j;
     prv -> i = (msk -> ctr - prv -> j) / pub -> m + 1;
 
-    element_init_Zr(delta, pub -> p);
+    element_init_Zr(delta_ij, pub -> p);
+    element_init_Zr(delta_ij_x, pub -> p);
+    element_init_Zr(attr_zr, pub -> p);
+
     element_init_G1(mul, pub -> p);
     element_init_G1(prv -> k0, pub -> p);
     element_init_G1(prv -> k1, pub -> p);
     element_init_G1(prv -> k2, pub -> p);
-    element_init_Zr(deltax, pub -> p);
-    element_init_Zr(attr_zr, pub -> p);
 
     prv -> attributes = g_ptr_array_new();
-    element_random(delta);
+    element_random(delta_ij);
+
     // g ^ alpha_i
     element_pow_zn(prv -> k0, pub -> g, msk -> alpha[prv -> i - 1]);
     // G_i^c_j
@@ -386,26 +496,26 @@ arcp_keygen(arcp_pub_t *pub,
     // f*f_j
     element_mul(mul, pub -> f, pub -> fs[prv -> j - 1]);
     // (f*f_j) ^ delta
-    element_pow_zn(mul, mul, delta);
+    element_pow_zn(mul, mul, delta_ij);
     // ((g ^ alpha_i) * (G_i^c_j)) * ((f*f_j) ^ delta)
     element_mul(prv->k0, prv->k0, mul);
 
     // g^delta
-    element_pow_zn(prv->k1, pub -> g, delta);
+    element_pow_zn(prv->k1, pub -> g, delta_ij);
 
     // Z_i ^ delta
-    element_pow_zn(prv->k2, pub -> gz[prv -> i - 1], delta);
+    element_pow_zn(prv->k2, pub -> gz[prv -> i - 1], delta_ij);
 
     prv -> k3 = malloc(sizeof(element_t) * (pub -> m));
-    prv -> ko = g_hash_table_new(g_str_hash, g_str_equal);
+    prv -> ks = g_hash_table_new(g_str_hash, g_str_equal);
 
-    for (int i = 0; i < pub -> m; i ++)
+    for (int j = 0; j < pub -> m; j ++)
     {
-        if (i + 1 == prv -> j)continue;
+        if (j + 1 == prv -> j)continue;
 
-        element_init_G1(prv -> k3[i], pub -> p);
+        element_init_G1(prv -> k3[j], pub -> p);
         // f_j' ^ delta
-        element_pow_zn(prv -> k3[i], pub -> fs[i], delta);
+        element_pow_zn(prv -> k3[j], pub -> fs[j], delta_ij);
     }
 
     while(*attributes)
@@ -421,37 +531,35 @@ arcp_keygen(arcp_pub_t *pub,
         element_init_G1(item -> k4, pub -> p);
         element_init_G1(item -> k5, pub -> p);
         
-        // delta_x
-        element_random(deltax);
+        // delta_ij_x
+        element_random(delta_ij_x);
         // rou(x)
         element_from_string(attr_zr, attr);
 
-        //g^delta_x
-        element_pow_zn(item -> k4, pub -> g, deltax);
+        //g^delta_ij_x
+        element_pow_zn(item -> k4, pub -> g, delta_ij_x);
 
         // H ^ x
         element_pow_zn(item -> k5, pub -> H, attr_zr);
         // (H^x)*h
         element_mul(item->k5, item->k5, pub -> h);
-
-        // ((H^x)*h)^delta_x
-        element_pow_zn(item -> k5, item -> k5, deltax);
+        // ((H^x)*h)^delta_ij_x
+        element_pow_zn(item -> k5, item -> k5, delta_ij_x);
         // element_invert(item -> k5, item -> k5);
 
         // G^delta
-        element_pow_zn(mul, pub -> G, delta);
+        element_pow_zn(mul, pub -> G, delta_ij);
         // (G^-delta)
         element_invert(mul, mul);
-        // (((H^x)*h)^delta_x) * (G^-delta)
+        // (((H^x)*h)^delta_ij_x) * (G^-delta)
         element_mul(item -> k5, item -> k5, mul);
         
-        g_hash_table_insert(prv -> ko, attr, item);
+        g_hash_table_insert(prv -> ks, attr, item);
     }
-
     element_clear(attr_zr);
-    element_clear(deltax);
+    element_clear(delta_ij_x);
     element_clear(mul);
-    element_clear(delta);
+    element_clear(delta_ij);
 
     return prv;
 
@@ -466,11 +574,12 @@ void arcp_enc(bswabe_policy_t* p,
 
     item = malloc(sizeof(arcp_cph_item));
 
-    element_init_Zr(xi, pub -> p);
     element_init_G1(item -> p0, pub -> p);
     element_init_G1(item -> p1, pub -> p);
     element_init_G1(item -> p2, pub -> p);
     element_init_G1(mul, pub -> p);
+    
+    element_init_Zr(xi, pub -> p);
     element_init_Zr(pow, pub -> p);
 
     element_from_string(pow, p -> attr);
@@ -481,6 +590,7 @@ void arcp_enc(bswabe_policy_t* p,
 
     element_pow_zn(item -> p0, pub -> f, p -> q -> coef[0]);
     
+    // element_printf("%B\n", item -> p0);
     element_pow_zn(mul, pub -> G, xi);
     element_mul(item -> p0, item -> p0, mul);
 
@@ -520,8 +630,8 @@ arcp_encrypt(arcp_pub_t *pub,
 
     j_min = user_index % pub -> m;
     j_min = j_min == 0 ? pub -> m:j_min;
-    j_min --;
     i_min = (user_index - j_min)/ pub -> m;
+    j_min --;
     
     /// random tau in Zr 
     element_init_Zr(tau, pub -> p);
@@ -545,13 +655,14 @@ arcp_encrypt(arcp_pub_t *pub,
     element_init_GT(m, pub -> p);
     
     element_random(m);
+    
     element_random(rx);
     element_random(ry);
     element_random(rz);
+
     element_random(pi);
     element_random(kappa);
     element_random(tau);
-    element_printf("before:\t%B\n", m);
 
     wj = malloc(sizeof(bswabe_polynomial_t*) * pub -> m);
     vi = malloc(sizeof(bswabe_polynomial_t*) * pub -> m);
@@ -668,54 +779,64 @@ arcp_encrypt(arcp_pub_t *pub,
         element_init_G1(cph -> q1[i], pub -> p);
         element_init_G1(cph -> q2[i], pub -> p);
         element_init_GT(cph -> t[i], pub -> p);
-
+        // g^s_i
         element_pow_zn(cph -> q0[i], pub -> g, s->coef[i]);
-
+        // f
         element_set(cph -> q1[i], pub -> f);
         
         for(int j = 1; j <= pub -> m; j ++)
             if ((sum = j + i * pub -> m) && !g_hash_table_contains(cph -> revo_list, &sum))
+                // f*f_j
                 element_mul(cph -> q1[i], cph -> q1[i], pub -> fs[j - 1]);
-        
+        // (f * f_j) ^ s_i
         element_pow_zn(cph -> q1[i], cph -> q1[i], s -> coef[i]);
-
+        // Z_i ^ t_i
         element_pow_zn(muls, pub -> gz[i], t -> coef[i]);
-
+        // g^t_i
         element_pow_zn(cph -> q2[i], pub -> g, t -> coef[i]);
 
         if (i < i_min)
         {
+            // g ^ vector vi
             cph -> r0[i] = vector_pow_base_new(xmid, pub -> g);
+            // kappa * vector vi
             vector_mul_element(xmid, xmid, kappa);
+            // g ^ (kappa * vector vi)
             cph -> r1[i] = vector_pow_base_new(xmid, pub -> g);
-            
-            element_mul(cph -> q1[i], cph -> q1[i], muls);
-            element_pow_zn(muls, pub -> f, pi);
-            element_mul(cph -> q1[i], cph -> q1[i], muls);
 
             element_random(s_back);
+            // E_i ^ s-_i
             element_pow_zn(cph -> t[i], pub -> egg_alpha[i], s_back);
         }
         else
         {
+            // vi ^ s_i
             vector_mul_element(xmid, xmid, s -> coef[i]);
+            // G_i ^ (vi ^ s_i)
             cph -> r0[i] = vector_pow_base_new(xmid, pub -> gr[i]);
+            // kappa ^ (vi ^ s_i)
             vector_mul_element(xmid, xmid, kappa);
+            // G_i ^ (kappa ^ (vi ^ s_i))
             cph -> r1[i] = vector_pow_base_new(xmid, pub -> gr[i]);
-
+            
+            //  vi . vc
             vector_inner_mul_out(s_back, vi[i], vc);
+            // s_back = (vi[i] * vc) * tau
             element_mul(s_back, s_back , tau);
-
+            // (g^s_i) ^ ((vi[i] * vc) * tau)
             element_pow_zn(cph -> q0[i], cph -> q0[i], s_back);
 
+            // ((f * f_j) ^ s_i) ^ ((vi[i] * vc) * tau)
             element_pow_zn(cph -> q1[i], cph -> q1[i], s_back);
-            element_mul(cph -> q1[i], cph -> q1[i], muls);
-            element_pow_zn(muls, pub -> g, pi);
-            element_mul(cph -> q1[i], cph -> q1[i], muls);
-
+            // ((vi[i] * vc) * tau) * s_i
+            element_mul(s_back, s_back, s -> coef[i]);
             element_pow_zn(cph -> t[i], pub -> egg_alpha[i], s_back);
             element_mul(cph -> t[i], cph -> t[i], m);
         }
+        // 
+        element_mul(cph -> q1[i], cph -> q1[i], muls);
+        element_pow_zn(muls, pub -> f, pi);
+        element_mul(cph -> q1[i], cph -> q1[i], muls);
         free_polynomial(xmid);
     }
     
@@ -746,8 +867,6 @@ arcp_encrypt(arcp_pub_t *pub,
         free_polynomial(cmid);
     }
     
-    element_invert(m,m);
-    element_printf("test:\t%B\n", m);
     fill_policy(cph -> policy, pub, pi, cph, arcp_enc);
 
     element_clear(rx);
@@ -790,7 +909,7 @@ void arcp_dec(element_t r,
     arcp_prv_item_t *prv_item;
 
     item = p -> cph;
-    prv_item = g_hash_table_lookup(prv->ko, p -> attr);
+    prv_item = g_hash_table_lookup(prv->ks, p -> attr);
 
     element_init_GT(s, pub -> p);
     element_init_GT(t, pub -> p);
@@ -847,8 +966,6 @@ arcp_decrypt(arcp_pub_t *pub,
 
     dec_flatten(dp, cph -> policy, prv, pub, pub -> p, arcp_dec);
     
-    element_printf("%B\t%B\t%B\n", s, t, dp);
-    
     element_set(kij, prv -> k0);
     for (int j = 0; j < pub -> m; j ++)
         if ((j + 1 != prv -> j) && 
@@ -867,7 +984,7 @@ arcp_decrypt(arcp_pub_t *pub,
     element_invert(t, t);
     //  e(k''_ij, q''_i)*e(k-_ij, q_i) / e(k'_ij, Q'_i)
     element_mul(s, s, t);
-
+    // element_set1(s);
     // e_3(R'_i, C'_j)
     vector_e_mul(t, cph -> r1[prv -> i - 1], cph -> c1[prv -> j - 1], pub -> p);
 
@@ -882,8 +999,6 @@ arcp_decrypt(arcp_pub_t *pub,
 
     element_mul(dp, dp, di);
     element_div(m, cph -> t[prv -> i - 1], dp);
-    element_printf("before invert:\t%B\n", m);
-    element_invert(m, m);
 
     element_clear(dp);
     element_clear(di);

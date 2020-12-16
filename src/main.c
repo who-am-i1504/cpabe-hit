@@ -343,13 +343,13 @@ int main()
 
     arcp_prv_t *prv1;
     prv1 = arcp_keygen(pub, msk, attrs);
-    printf("%d\t%d\n", prv1 -> i, prv1 -> j);
+    // printf("%d\t%d\n", prv1 -> i, prv1 -> j);
     arcp_prv_t *prv2;
     prv2 = arcp_keygen(pub, msk, attrs);
-    printf("%d\t%d\n", prv2 -> i, prv2 -> j);
+    // printf("%d\t%d\n", prv2 -> i, prv2 -> j);
     arcp_prv_t *prv3;
     prv3 = arcp_keygen(pub, msk, attrs);
-    printf("%d\t%d\n", prv3 -> i, prv3 -> j);
+    // printf("%d\t%d\n", prv3 -> i, prv3 -> j);
 
     arcp_cph_t * cph;
     element_t m;
@@ -360,12 +360,12 @@ int main()
 
 
     cph = arcp_encrypt(pub, m, revo_list, p, 2);
-    element_printf("%B\n", m);
+    // element_printf("%B\n", m);
 
     element_t res;
 
     // printf("here\n");
-    if (arcp_decrypt(pub, cph, prv1, res))
+    if (arcp_decrypt(pub, cph, prv3, res))
     {
         printf("%s\n", bswabe_error());
     }
@@ -379,4 +379,4 @@ int main()
     // element_printf("%B\n", res);
 
     return 0;
-}*/
+}
