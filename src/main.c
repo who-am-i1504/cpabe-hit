@@ -103,6 +103,7 @@
 #include "policy_lang.h"
 #include "universe/core.h"
 #include "decentral/core.h"
+#include "revocation/core.h"
 /*
 int main()
 {
@@ -174,7 +175,9 @@ int main()
     
 }
 
-/*/
+/*
+
+// 测试多授权属性加密代码
 int main()
 {
     char *policy = "(sysadmin and hire_date)" \
@@ -282,3 +285,98 @@ int main()
     
     return 0;
 }
+*/
+
+int main()
+{
+
+    char *policy = "(sysadmin and hire_date)" \
+        " or (sysadmin and security_team and 2 of (executive_level, audit_group, strategy_team))";
+
+    char *p = parse_policy_lang(policy);
+    
+
+    // printf("%s\n", p);
+    // t_node * node = generate_tree(p);
+    
+    // GPtrArray * matrix;
+    // // matrix = generate_access_array(node);
+    // // print_matrix(matrix);
+    // // char ** rhos = generate_rhos(node);
+    // // print_rhos(rhos);
+    // // printf("here\n");
+    // // free(p);
+
+    char *attributes[] = {
+        "sysadmin",
+        "hire_date",
+        "security_team",
+        "executive_level",
+        "audit_group",
+        NULL
+    };
+    GSList* alist;
+    char **attrs;
+    alist = 0;
+    for (int i = 0; i < 5; i ++)
+    {
+        // printf("\t%s\n", attributes[i]);
+        parse_attribute(&alist, *(attributes + i));
+    }
+    int j = 0;
+    
+    attrs = malloc(sizeof(char *) * (g_slist_length(alist) + 1));
+    for (GSList *a = alist; a!=NULL; a = a ->next)
+    {
+        *(attrs + j) = a -> data;
+        // printf("%s\n", *(attrs + j));
+        j ++;
+    }
+    *(attrs + j) = NULL;
+
+
+
+    arcp_pub_t * pub;
+    arcp_msk_t * msk;
+
+    arcp_setup(&pub, &msk, 100);
+
+    arcp_prv_t *prv1;
+    prv1 = arcp_keygen(pub, msk, attrs);
+    printf("%d\t%d\n", prv1 -> i, prv1 -> j);
+    arcp_prv_t *prv2;
+    prv2 = arcp_keygen(pub, msk, attrs);
+    printf("%d\t%d\n", prv2 -> i, prv2 -> j);
+    arcp_prv_t *prv3;
+    prv3 = arcp_keygen(pub, msk, attrs);
+    printf("%d\t%d\n", prv3 -> i, prv3 -> j);
+
+    arcp_cph_t * cph;
+    element_t m;
+    GArray * revo_list;
+    revo_list = g_array_new(0, 1, sizeof(int));
+    int i = 2;
+    g_array_append_val(revo_list, i);
+
+
+    cph = arcp_encrypt(pub, m, revo_list, p, 2);
+    element_printf("%B\n", m);
+
+    element_t res;
+
+    // printf("here\n");
+    if (arcp_decrypt(pub, cph, prv1, res))
+    {
+        printf("%s\n", bswabe_error());
+    }
+    else
+    {
+        printf("比较原数据与解密后数据是否相同：%s\n", element_cmp(m, res)?"FALSE":"TRUE");
+        element_printf("The background M : %B\n", m);
+        element_printf("The decryption M : %B\n", res);
+    }
+    
+    // element_printf("%B\n", res);
+
+    return 0;
+}*/

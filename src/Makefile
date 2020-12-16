@@ -103,7 +103,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_main_OBJECTS = main.$(OBJEXT) common.$(OBJEXT) \
 	policy_lang.$(OBJEXT) policy.$(OBJEXT) core.$(OBJEXT) \
-	dcpabe.$(OBJEXT)
+	dcpabe.$(OBJEXT) revocation.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_$(V))
@@ -127,7 +127,8 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/common.Po ./$(DEPDIR)/core.Po \
 	./$(DEPDIR)/dcpabe.Po ./$(DEPDIR)/main.Po \
-	./$(DEPDIR)/policy.Po ./$(DEPDIR)/policy_lang.Po
+	./$(DEPDIR)/policy.Po ./$(DEPDIR)/policy_lang.Po \
+	./$(DEPDIR)/revocation.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -211,7 +212,7 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lglib-2.0 -lpbc -lgmp -lcrypto 
+LIBS = -lglib-2.0 -lpbc -lgmp -lcrypto -lm
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
@@ -296,7 +297,7 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AUTOMAKE_OPTIONS = foreign
-main_SOURCES = main.c common.c policy_lang.c policy.c universe/core.c decentral/dcpabe.c
+main_SOURCES = main.c common.c policy_lang.c policy.c universe/core.c decentral/dcpabe.c revocation/revocation.c
 INCLUDES = -I../include -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/pbc -I/usr/local/include/pbc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -413,6 +414,7 @@ include ./$(DEPDIR)/dcpabe.Po # am--include-marker
 include ./$(DEPDIR)/main.Po # am--include-marker
 include ./$(DEPDIR)/policy.Po # am--include-marker
 include ./$(DEPDIR)/policy_lang.Po # am--include-marker
+include ./$(DEPDIR)/revocation.Po # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -468,6 +470,20 @@ dcpabe.obj: decentral/dcpabe.c
 #	$(AM_V_CC)source='decentral/dcpabe.c' object='dcpabe.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dcpabe.obj `if test -f 'decentral/dcpabe.c'; then $(CYGPATH_W) 'decentral/dcpabe.c'; else $(CYGPATH_W) '$(srcdir)/decentral/dcpabe.c'; fi`
+
+revocation.o: revocation/revocation.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT revocation.o -MD -MP -MF $(DEPDIR)/revocation.Tpo -c -o revocation.o `test -f 'revocation/revocation.c' || echo '$(srcdir)/'`revocation/revocation.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/revocation.Tpo $(DEPDIR)/revocation.Po
+#	$(AM_V_CC)source='revocation/revocation.c' object='revocation.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o revocation.o `test -f 'revocation/revocation.c' || echo '$(srcdir)/'`revocation/revocation.c
+
+revocation.obj: revocation/revocation.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT revocation.obj -MD -MP -MF $(DEPDIR)/revocation.Tpo -c -o revocation.obj `if test -f 'revocation/revocation.c'; then $(CYGPATH_W) 'revocation/revocation.c'; else $(CYGPATH_W) '$(srcdir)/revocation/revocation.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/revocation.Tpo $(DEPDIR)/revocation.Po
+#	$(AM_V_CC)source='revocation/revocation.c' object='revocation.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o revocation.obj `if test -f 'revocation/revocation.c'; then $(CYGPATH_W) 'revocation/revocation.c'; else $(CYGPATH_W) '$(srcdir)/revocation/revocation.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -608,6 +624,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/main.Po
 	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
+	-rm -f ./$(DEPDIR)/revocation.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -659,6 +676,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/main.Po
 	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
+	-rm -f ./$(DEPDIR)/revocation.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
