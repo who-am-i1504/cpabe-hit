@@ -244,7 +244,7 @@ fill_policy( bswabe_policy_t* p,
 			eval_poly(t, p->q, r);
 			fill_policy(g_ptr_array_index(p->children, i), pub, t, cph, enc_function);
 		}
-	// free_polynomial(p->q);
+	free_polynomial(p->q);
 	element_clear(r);
 	element_clear(t);
 	

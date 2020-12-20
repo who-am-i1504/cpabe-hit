@@ -1,15 +1,19 @@
+/*
+ * @Author: your name
+ * @Date: 2020-12-07 20:24:43
+ * @LastEditTime: 2020-12-18 10:15:18
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /cpabe-hit/include/revocation/private.h
+ */
 #ifndef REVOCATION_H
 #define REVOCATION_H
 #include <math.h>
 #include "policy.h"
+#include "vector.h"
 #include <pbc.h>
 #include <glib.h>
 #include <stdarg.h>
-
-typedef enum
-{
-    G1, Zr, GT
-}element_type;
 
 typedef struct {
     char *pairing_desc;
@@ -55,6 +59,7 @@ typedef struct {
     element_t p0;
     element_t p1;
     element_t p2;
+    GHashTable * revo_list;
 } arcp_cph_item;
 
 typedef struct {

@@ -359,13 +359,14 @@ int main()
     g_array_append_val(revo_list, i);
 
 
-    cph = arcp_encrypt(pub, m, revo_list, p, 2);
+    cph = arcp_encrypt(pub, m, revo_list, p, 1);
     // element_printf("%B\n", m);
 
     element_t res;
 
     // printf("here\n");
-    if (arcp_decrypt(pub, cph, prv3, res))
+    // arcp_reencrypt(pub, cph, 3);
+    if (arcp_decrypt(pub, cph, prv1, res))
     {
         printf("%s\n", bswabe_error());
     }

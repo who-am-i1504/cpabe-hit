@@ -102,8 +102,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_main_OBJECTS = main.$(OBJEXT) common.$(OBJEXT) \
-	policy_lang.$(OBJEXT) policy.$(OBJEXT) core.$(OBJEXT) \
-	dcpabe.$(OBJEXT) revocation.$(OBJEXT)
+	policy_lang.$(OBJEXT) policy.$(OBJEXT) vector.$(OBJEXT) \
+	core.$(OBJEXT) dcpabe.$(OBJEXT) revocation.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_$(V))
@@ -128,7 +128,7 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/common.Po ./$(DEPDIR)/core.Po \
 	./$(DEPDIR)/dcpabe.Po ./$(DEPDIR)/main.Po \
 	./$(DEPDIR)/policy.Po ./$(DEPDIR)/policy_lang.Po \
-	./$(DEPDIR)/revocation.Po
+	./$(DEPDIR)/revocation.Po ./$(DEPDIR)/vector.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -297,7 +297,7 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AUTOMAKE_OPTIONS = foreign
-main_SOURCES = main.c common.c policy_lang.c policy.c universe/core.c decentral/dcpabe.c revocation/revocation.c
+main_SOURCES = main.c common.c policy_lang.c policy.c vector.c universe/core.c decentral/dcpabe.c revocation/revocation.c
 INCLUDES = -I../include -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/pbc -I/usr/local/include/pbc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -415,6 +415,7 @@ include ./$(DEPDIR)/main.Po # am--include-marker
 include ./$(DEPDIR)/policy.Po # am--include-marker
 include ./$(DEPDIR)/policy_lang.Po # am--include-marker
 include ./$(DEPDIR)/revocation.Po # am--include-marker
+include ./$(DEPDIR)/vector.Po # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -625,6 +626,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
 	-rm -f ./$(DEPDIR)/revocation.Po
+	-rm -f ./$(DEPDIR)/vector.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -677,6 +679,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
 	-rm -f ./$(DEPDIR)/revocation.Po
+	-rm -f ./$(DEPDIR)/vector.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
