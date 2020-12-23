@@ -1,7 +1,7 @@
 /*
  * @Author: Qinggang Wu
  * @Date: 2020-12-17 16:58:50
- * @LastEditTime: 2020-12-20 15:03:32
+ * @LastEditTime: 2020-12-20 21:57:03
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/src/drevocation/drevocation.c
@@ -20,628 +20,366 @@
 
 #endif
 
-
-void global_setup(drevo_pub_t **pub, int AA_Num)
+void 
+drevo_setup(drevo_pub_t** pub, 
+            drevo_msk_t** msk)
 {
-    *pub = malloc(sizeof(drevo_pub_t));
+    element_t beta_invert;
+    (*pub) = malloc(sizeof(drevo_pub_t));
+    (*msk) = malloc(sizeof(drevo_msk_t));
 
-    (*pub) -> pairing_desc = strdup(TYPE_A_PARAMS);
+    (*pub)->pairing_desc = strdup(TYPE_A_PARAMS);
 
-    pairing_init_set_buf((*pub) -> p, 
-        (*pub) -> pairing_desc, strlen((*pub) -> pairing_desc));
+    pairing_init_set_buf((*pub)->p, 
+        (*pub)->pairing_desc, strlen((*pub)->pairing_desc));
     
-    element_init_G1((*pub) -> g, (*pub) -> p);
-    element_init_GT((*pub) -> egg, (*pub) -> p);
+    element_init_G1((*pub)->g, (*pub)->p);
+    element_init_G1((*pub)->g_a, (*pub)->p);
+    element_init_G1((*pub)->g_beta, (*pub)->p);
+    element_init_G1((*pub)->g_beta_invert, (*pub)->p);
+    element_init_GT((*pub)->egg_alpha, (*pub)->p);
+    element_init_Zr((*msk)->a, (*pub)->p);
+    element_init_Zr((*msk)->alpha, (*pub)->p);
+    element_init_Zr((*msk)->beta, (*pub)->p);
+    element_init_Zr((*msk)->gamma, (*pub)->p);
+    element_init_Zr(beta_invert, (*pub)->p);
 
-    element_random((*pub) -> g);
+    element_random((*pub)->g);
+    element_random((*msk)->a);
+    element_random((*msk)->alpha);
+    element_random((*msk)->beta);
+    element_random((*msk)->gamma);
 
-    element_pairing((*pub) -> egg, (*pub) -> g, (*pub) -> g);
+    element_invert(beta_invert, (*msk)->beta);
+
+    element_pow_zn((*pub)->g_a, (*pub)->g, (*msk)->a);
+    element_pow_zn((*pub)->g_beta, (*pub)->g, (*msk)->beta);
+    element_pow_zn((*pub)->g_beta_invert, (*pub)->g, beta_invert);
+
+    element_pairing((*pub)->egg_alpha, (*pub)->g, (*pub)->g);
+    element_pow_zn((*pub)->egg_alpha, (*pub)->egg_alpha, (*msk)->alpha);
+    
+    element_clear(beta_invert);
+
+    (*msk)->Vx = g_hash_table_new(g_str_hash, g_str_equal);
 }
 
-void aasetup(drevo_apk_t** apk, 
-             drevo_ask_t** ask, 
-             drevo_pub_t* pub,
-             char *aid)
+drevo_pkx_t*
+drevo_pk_setup(drevo_pub_t* pub, 
+               drevo_msk_t* msk,
+               char *attribute)
 {
-    (*apk) = malloc(sizeof(drevo_apk_t));
-    (*ask) = malloc(sizeof(drevo_apk_t));
+    element_t *vx;
+    drevo_pkx_t* pkx;
+    pkx = malloc(sizeof(drevo_pkx_t));
+    pkx->attribute = strdup(attribute);
 
-    element_init_Zr((*ask) -> alpha, pub -> p);
-    element_init_Zr((*ask) -> y, pub -> p);
-    element_init_GT((*apk) -> egg_alpha, pub -> p);
-    element_init_G1((*apk) -> gy, pub -> p);
+    vx = malloc(sizeof(element_t));
 
-    element_random((*ask) -> alpha);
-    element_random((*ask) -> y);
+    element_init_G1(pkx->pk1, pub->p);
+    element_init_G1(pkx->pk2, pub->p);
+    element_init_Zr(*vx, pub->p);
 
-    element_pow_zn((*apk) -> egg_alpha, pub -> egg, (*ask) -> alpha);
-    element_pow_zn((*apk) -> gy, pub -> g, (*ask) -> y);
+    element_from_string(pkx->pk1, pkx->attribute);
+    element_random(*vx);
+
+    element_pow_zn(pkx->pk1, pkx->pk1, *vx);
+
+    element_pow_zn(pkx->pk2, pkx->pk1, msk->gamma);
+
+    g_hash_table_insert(msk->Vx, attribute, vx);
+    return pkx;
 }
 
-drevo_prv_t *
-drevo_init_prv(int gid)
+drevo_prv_t*
+drevo_keygen(drevo_pub_t* pub,
+             drevo_msk_t* msk,
+             GHashTable* pkxs,
+             char **attributes)
 {
     drevo_prv_t* prv;
+    element_t t, tm;
+
     prv = malloc(sizeof(drevo_prv_t));
 
-    prv -> attributes = g_ptr_array_new();
+    prv->attrs = g_ptr_array_new();
+    prv->Kx = g_hash_table_new(g_str_hash, g_str_equal);
 
-    prv -> sk = g_hash_table_new(g_str_hash, g_str_equal);
+    element_init_Zr(t, pub->p);
+    element_init_Zr(tm, pub->p);
+    element_init_G1(prv->K, pub->p);
+    element_init_G1(prv->L, pub->p);
 
-    prv -> gid = gid;
+    element_random(t);
+    element_mul(tm, t, msk->a);
+
+    element_pow_zn(prv->L, pub->g, t);
+
+    element_pow2_zn(prv->K, 
+        pub->g_beta_invert, msk->alpha, pub->g_beta_invert, tm);
+    
+    element_mul(tm, t, msk -> beta);
+    
+    while(*attributes)
+    {
+        char *attr;
+        element_t *kx;
+        drevo_pkx_t* pkx;
+
+        attr = strdup(*(attributes ++));
+        kx = malloc(sizeof(element_t));
+        pkx = g_hash_table_lookup(pkxs, attr);
+
+        element_init_G1(*kx, pub->p);
+        element_pow2_zn(*kx, pub->g_beta, tm, pkx->pk1, tm);
+
+        g_hash_table_insert(prv->Kx, attr, kx);
+
+        g_ptr_array_add(prv->attrs, attr);
+    }
+
+    element_clear(t);
+    element_clear(tm);
     return prv;
+    
 }
 
 void 
-attr_key_gen(drevo_prv_t* prv,
-             drevo_pub_t* pub,
-             drevo_ask_t* ask,
-             int gid,
-             char *attribute)
+drevo_enc_detail(bswabe_policy_t* p,
+                 drevo_pub_t* pub,
+                 GHashTable* pkxs)
 {
-    element_t t, hgid, fattr;
+    drevo_cph_item_t* item;
+    drevo_pkx_t* pkx;
+    element_t r, r_neg;
     
-    element_init_Zr(t, pub -> p);
-    element_init_G1(hgid, pub -> p);
-    element_init_G1(fattr, pub -> p);
-    element_set_si(hgid, gid);
+    pkx = g_hash_table_lookup(pkxs, p->attr);
+    item = malloc(sizeof(drevo_cph_item_t));
+    p->cph = item;
 
-    while(*attribute)
-    {
-        drevo_prv_item_t* item;
-        char *attr;
+    element_init_Zr(r, pub->p);
+    element_init_Zr(r_neg, pub->p);
 
-        attr = strdup(*(attribute ++));
+    element_init_G1(item->C1, pub->p);
+    element_init_G1(item->D1, pub->p);
+    element_init_G1(item->D2, pub->p);
 
-        item = malloc(sizeof(drevo_prv_item_t));
-
-        element_init_G1(item -> k0, pub -> p);
-        element_init_G1(item -> k1, pub -> p);
-        
-
-        element_random(t);
-
-        element_from_string(fattr, attr);
-
-        element_pow3_zn(item -> k0, pub -> g, ask -> alpha, hgid, ask -> y, fattr, t);
-
-        element_pow_zn(item -> k1, pub -> g, t);
-
-        g_hash_table_insert(prv -> sk, attr, item);
-        g_ptr_array_add(prv -> attributes, attr);
-    }
-    element_clear(t);
-    element_clear(hgid);
-    element_clear(fattr);
-
-}
-
-drevo_kek_tree_t* 
-kek_tree(char *aid, 
-         char *attribute, 
-         int user_num, 
-         drevo_pub_t* pub)
-{
-    drevo_kek_tree_t* treex;
-    treex = malloc(sizeof(drevo_kek_tree_t));
+    element_random(r);
+    element_neg(r_neg, r);
     
+    element_pow3_zn(item->C1, pub->g_a, 
+        p->q->coef[0], pub->g_beta, r_neg, pkx->pk1, r_neg);
+    
+    element_pow_zn(item->D1, pkx->pk2, r);
 
+    element_pow_zn(item->D2, pub->g_beta_invert, r);
 
-}
-
-void
-drevo_fill_policy( bswabe_policy_t* p, 
-                   drevo_pub_t* pub, 
-                   element_t e,
-                   element_t z,
-                   GHashTable* apk_list)
-{
-	int i;
-	element_t r;
-	element_t t;
-	element_t h;
-    bswabe_polynomial_t* zi;
-	
-	element_init_same_as(r, e);
-	element_init_same_as(t, e);
-	element_init_same_as(h, z);
-
-	p->q = rand_poly(p->k - 1, e);
-    zi = rand_poly(p->k - 1, z);
-	if( p->children->len == 0 )
-	{
-		element_t ri, fattr;
-        drevo_cph_item_t * item;
-        drevo_apk_t * apk;
-        
-        item = malloc(sizeof(drevo_cph_item_t));
-
-        apk = g_hash_table_lookup(apk_list, p -> attr);
-
-        element_init_GT(item -> C1, pub -> p);
-        element_init_G1(item -> C2, pub -> p);
-        element_init_G1(item -> C3, pub -> p);
-        element_init_G1(item -> C4, pub -> p);
-        element_init_G1(fattr, pub -> p);
-
-        element_init_Zr(ri, pub -> p);
-
-        element_from_string(fattr, p -> attr);
-        element_random(ri);
-
-        element_pow2_zn(item -> C1, 
-            pub -> egg, p->q->coef[0], apk -> egg_alpha, ri);
-        
-        element_pow2_zn(item -> C3, 
-            apk -> gy, ri, pub -> g, zi -> coef[0]);
-        
-        element_pow_zn(item -> C4, fattr, ri);
-
-        element_pow_zn(item -> C2, pub -> g, ri);
-        element_invert(item -> C2, item -> C2);
-        p -> cph = item;
-        element_clear(ri);
-        element_clear(fattr);
-	}
-	else
-		for( i = 0; i < p->children->len; i++ )
-		{
-			element_set_si(r, i + 1);
-			eval_poly(t, p->q, r);
-            eval_poly(h, zi, r);
-			drevo_fill_policy(g_ptr_array_index(p->children, i), pub, t, h, apk_list);
-		}
-	free_polynomial(p->q);
-	free_polynomial(zi);
-	element_clear(r);
-	element_clear(t);
-	element_clear(h);
-	
+    element_clear(r);
+    element_clear(r_neg);
 }
 
 drevo_cph_t*
 drevo_encrypt(drevo_pub_t* pub,
-              GHashTable* apk_list,
-              char *policy,
-              element_t m)
+              element_t m,
+              GHashTable* pkxs,
+              char *policy)
 {
-    drevo_cph_t * cph;
-    element_t s, z;
-    
+    drevo_cph_t* cph;
+    element_t s;
+
     cph = malloc(sizeof(drevo_cph_t));
 
-    cph -> policy_desc = strdup(policy);
+    element_init_GT(m, pub->p);
+    element_init_GT(cph->C, pub->p);
+    element_init_G1(cph->C1, pub->p);
 
-    cph -> policy - parse_policy_postfix(policy);
+    element_init_Zr(s, pub->p);
 
-    element_init_GT(m, pub -> p);
-    element_init_GT(cph -> C0, pub -> p);
-
-    element_init_Zr(s, pub -> p);
-    element_init_Zr(z, pub -> p);
-
-    element_random(s);
     element_random(m);
-    element_pow_zn(cph -> C0, pub -> egg, s);
-    element_mul(cph -> C0, cph -> C0, m);
+    element_random(s);
 
-    element_set0(z);
+    element_pow_zn(cph->C, pub->egg_alpha, s);
+    element_mul(cph->C, cph->C, m);
 
-    drevo_fill_policy(cph -> policy, pub, s, z, apk_list);
+    element_pow_zn(cph->C1, pub->g_beta, s);
+
+    cph->p = parse_policy_postfix(policy);
+    cph->policy = strdup(policy);
+
+    fill_policy(cph->p, pub, s, pkxs, drevo_enc_detail);
 
     element_clear(s);
-    element_clear(z);
-
     return cph;
 }
 
-void 
-drevo_reencrypt_policy(bswabe_policy_t* p, 
-                       GHashTable* agk)
-{
-    if( p->children->len == 0 )
-    {
-        drevo_cph_item_t* item;
-        item = p -> cph;
-
-        element_pow_zn(item -> C4, item -> C4, 
-            *((element_t *)g_hash_table_lookup(agk, p -> attr)));
-    }
-    else
-    {
-        for (int i = 0; i < p->children->len; i++)
-            drevo_reencrypt(g_ptr_array_index(p->children, i), agk);
-    }
-    
-}
-
 void
-drevo_reencrypt(drevo_cph_t *cph,
-                GHashTable * agk)
+drevo_dec_detail(element_t r,
+                 element_t exp,
+                 bswabe_policy_t* p,
+                 drevo_prv_t* prv,
+                 drevo_pub_t* pub)
 {
-    drevo_reencrypt_policy(cph -> policy, agk);
-}
-
-void drevo_dec(element_t r,
-               element_t exp,
-               bswabe_policy_t* p,
-               drevo_mid_value * mid,
-               drevo_pub_t* pub)
-{
-    drevo_prv_t* prv;
-    element_t s, t, hgid, agk_invert, km;
+    element_t s, t;
     drevo_cph_item_t* item;
-    drevo_prv_item_t* prv_item;
-    GHashTable * agk;
-    
-    prv = mid -> prv;
-    agk = mid -> agk;
+    element_t *kx;
 
-    item = p -> cph;
-    prv_item = g_hash_table_lookup(prv->sk, p -> attr);
-    
-    element_init_GT(s, pub -> p);
-    element_init_GT(t, pub -> p);
-    element_init_G1(hgid, pub -> p);
-    element_init_Zr(agk_invert, pub -> p);
-    element_init_G1(km, pub -> p);
+    item = p->cph;
+    kx = g_hash_table_lookup(prv->Kx, p->attr);
 
-    element_pairing(s, prv_item -> k0, item -> C2);
-    element_mul(s, item -> C1, s);
-    
-    element_set_si(hgid, prv -> gid);
-    element_pairing(t, hgid, item -> C3);
-    element_mul(s, s, t);
+    element_init_GT(s, pub->p);
+    element_init_GT(t, pub->p);
 
-    element_invert(agk_invert, 
-        *((element_t *)g_hash_table_lookup(agk, p -> attr)));
-    
-    element_pow_zn(km, prv_item -> k1, agk_invert);
-
-    element_pairing(t, km, item -> C4);
+    element_pairing(s, item->C1, prv->L);
+    element_pairing(t, item->D2, *kx);
 
     element_mul(s, s, t);
 
     element_pow_zn(s, s, exp);
+
     element_mul(r, r, s);
 
     element_clear(s);
     element_clear(t);
-    element_clear(hgid);
-
 }
 
 
-int 
-drevo_decrypt(drevo_cph_t* cph, 
-              drevo_pub_t* pub,
-              GHashTable* agk,
+int
+drevo_decrypt(drevo_pub_t* pub,
+              drevo_cph_t* cph,
               drevo_prv_t* prv,
               element_t m)
 {
     int res;
-    element_t egg_s;
-    GPtrArray* attributes;
-    GList* prv;
-    drevo_mid_value mid;
-
+    element_t dp, di;
     res = 0;
-    
-    attributes = g_ptr_array_new();
-    prv = g_hash_table_get_keys(prv->sk);
 
-    for (GList* p = prv; p != NULL; p = p -> next)
-        g_ptr_array_add(attributes, p -> data);
-        
+    check_sat(cph->p, prv->attrs);
 
-    element_init_GT(m, pub -> p);
-    element_init_GT(egg_s, pub -> p);
-    
-    check_sat(cph -> policy, attributes);
+    pick_sat_min_leaves(cph->p);
 
-    pick_sat_min_leaves(cph -> policy);
-
-    if (!cph -> policy -> satisfiable)
+    if (!cph->p->satisfiable)
     {
-        raise_error("your attributes can't satify the policy.");
+        raise_error("your attributes can't satify the access policy.\n");
         res = 1;
         goto drevo_destory;
     }
+
+    element_init_GT(dp, pub->p); 
+    element_init_GT(m, pub->p); 
+    element_init_GT(di, pub->p); 
+
+    dec_flatten(dp, cph->p, prv, pub, pub->p, drevo_dec_detail);
     
-    mid.pub = pub;
-    mid.agk = agk;
-    mid.prv = prv;
-    dec_flatten(egg_s, cph -> policy, 
-        &mid, pub, pub -> p, drevo_dec);
+    element_pairing(di, cph->C1, prv->K);
+    
+    element_invert(dp, dp);
 
-    element_div(m, cph -> C0, egg_s);
+    element_mul(dp, dp, di);
 
-    element_clear(egg_s);
+    element_invert(dp, dp);
+
+    element_mul(m, dp, cph->C);
+
+    element_clear(dp);
+    element_clear(di);
 
 drevo_destory:
-    g_list_free(prv);
-    g_ptr_array_free(attributes, FALSE);
 
     return res;
 }
 
-void 
-drevo_modify(bswabe_policy_t* p, 
-             element_t z)
+
+void
+drevo_ukeygen(drevo_uk_t** uk, 
+              drevo_msk_t* msk,
+              element_t vx)
 {
-    if (!p -> children -> len)
-    {
-        drevo_cph_item_t *item;
-        item = p -> cph;
-        element_pow_zn(item -> C1, item -> C1, z);
-        element_pow_zn(item -> C3, item -> C3, z);
-    }
-    else
-        for (int i = 0; i < p -> children -> len; i ++)
-            drevo_modify(g_ptr_array_index(p -> children, i), z);
+    element_t vx_new, vxm;
+
+    (*uk) = malloc(sizeof(drevo_uk_t));
+
+    element_init_same_as((*uk)->uk1, vx);
+    element_init_same_as((*uk)->uk2, vx);
+    element_init_same_as(vx_new, vx);
+    element_init_same_as(vxm, vx);
+
+    element_random(vx_new);
+
+    element_div((*uk)->uk1, vx_new, vx);
+    
+    element_sub(vxm, vx, vx_new);
+    
+    element_div((*uk)->uk2, vxm, vx);
+    element_div((*uk)->uk2, (*uk)->uk2, msk->gamma);
+
+    element_set(vx, vx_new);
+
+    element_clear(vx_new);
+    element_clear(vxm);
+
 }
 
 void 
-drevo_genTK(drevo_tk_t** tk, 
-            drevo_rk_t** rk,
-            drevo_prv_t* prv,
-            drevo_pub_t* pub,
-            GHashTable* agk)
+drevo_update_pkx(drevo_pkx_t* pkx, 
+                 element_t vx,
+                 drevo_uk_t* uk)
 {
-    GList* attrs;
-    element_t km, z, mid;
-
-    (*tk) = malloc(sizeof(drevo_tk_t));
-    (*rk) = malloc(sizeof(drevo_rk_t));
-
-    (*tk) -> attributes = g_ptr_array_copy(prv -> attributes, strdup, NULL);
-    
-    (*tk) -> gid = prv -> gid;
-    (*tk) -> tk = g_hash_table_new(g_str_hash, g_str_equal);
-    
-    element_init_Zr((*rk) -> z, pub -> p);
-    element_init_Zr(z, pub -> p);
-    element_init_Zr(mid, pub -> p);
-
-    element_random((*rk) -> z);
-    element_invert(z, (*rk) -> z);
-
-    attrs = g_hash_table_get_keys(prv -> sk);
-    element_init_G1(km, pub -> p);
-    for (GList* p = attrs; p != NULL; p = p -> next)
-    {
-        drevo_prv_item_t* item;
-        drevo_prv_item_t* prv_item;
-
-        item = malloc(sizeof(drevo_prv_item_t));
-
-        prv_item = g_hash_table_lookup(prv->sk, p -> data);
-        element_init_as(item -> k0, prv_item -> k0);
-        element_init_as(item -> k1, prv_item -> k0);
-
-        element_set(km, prv_item -> k0);
-
-        element_pow_zn(item -> k0, km, z);
-        element_invert(mid, *((element_t *)g_hash_table_lookup(agk, p -> data)));
-
-        element_pow_zn(km, km, mid);
-
-        element_pow_zn(item -> k1, km, z);
-
-        g_hash_table_insert((*tk) -> tk, p -> data, item);
-
-    }
-
-    element_clear(km);
-    element_clear(z);
-    element_clear(mid);
+    element_pow_zn(pkx->pk1, pkx->pk1, uk->uk1);
+    element_pow_zn(pkx->pk2, pkx->pk2, uk->uk1);
 }
 
-
-void drevo_transform_dec(element_t r,
-               element_t exp,
-               bswabe_policy_t* p,
-               drevo_tk_t * prv,
-               drevo_pub_t* pub)
+void
+drevo_update_prv_key(drevo_prv_t* prv,
+                     drevo_msk_t* msk,
+                     drevo_uk_t* uk,
+                     char *attribute)
 {
-    element_t s, t, hgid;
+    element_t *kx;
+    element_t L_beta_2;
+    
+    element_init_same_as(L_beta_2, prv->L);
+
+    element_pow_zn(L_beta_2, prv->L, msk->beta);
+    element_pow_zn(L_beta_2, L_beta_2, msk->beta);
+
+    kx = g_hash_table_lookup(prv->Kx, attribute);
+
+    element_div(*kx, *kx, L_beta_2);
+    element_pow_zn(*kx, *kx, uk->uk1);
+
+    element_mul(*kx, *kx, L_beta_2);
+
+    element_clear(L_beta_2);
+}
+
+void
+drevo_cph_update(drevo_cph_t* cph,
+                 drevo_uk_t* uk,
+                 drevo_pub_t* pub,
+                 char * attribute)
+{
+    GQueue* queue;
+    element_t mid;
     drevo_cph_item_t* item;
-    drevo_prv_item_t* prv_item;
-    
-    item = p -> cph;
-    prv_item = g_hash_table_lookup(prv->tk, p -> attr);
-    
-    element_init_GT(s, pub -> p);
-    element_init_GT(t, pub -> p);
-    element_init_G1(hgid, pub -> p);
+    queue = g_queue_new();
 
-    element_pairing(s, prv_item -> k0, item -> C2);
-    element_mul(s, item -> C1, s);
-    
-    element_set_si(hgid, prv -> gid);
-    element_pairing(t, hgid, item -> C3);
-    element_mul(s, s, t);
-
-    element_pairing(t, prv_item -> k1, item -> C4);
-
-    element_mul(s, s, t);
-
-    element_pow_zn(s, s, exp);
-    element_mul(r, r, s);
-
-    element_clear(s);
-    element_clear(t);
-    element_clear(hgid);
-
-}
-
-drevo_cph_out_t*
-drevo_transform(drevo_cph_t* cph,
-                drevo_pub_t* pub,
-                drevo_tk_t* tk)
-{
-    drevo_cph_out_t* out;
-
-    out = malloc(sizeof(drevo_cph_out_t));
-
-    out -> policy = strdup(cph -> policy_desc);
-
-    element_init_same_as(out -> C0, cph -> C0);
-
-    element_init_GT(out -> egg_s_z, pub -> p);
-
-    element_set(out -> C0, cph -> C0);
-
-    check_sat(cph -> policy, tk -> attributes);
-
-    pick_sat_min_leaves(cph -> policy);
-    
-    dec_flatten(out -> egg_s_z, cph -> policy, tk, pub, pub -> p, drevo_transform_dec);
-    
-    return out;
-}
-
-void 
-revo_decrypt_out(drevo_cph_out_t* out,
-                 drevo_rk_t* rk,
-                 element_t m)
-{
-    element_init_same_as(m, out -> egg_s_z);
-    element_pow_zn(m, out -> egg_s_z, rk -> z);
-    element_div(m, out -> C0, m);
-}
-
-void
-revo_keyupdate(drevo_prv_t *prv, 
-               char *attribute, 
-               element_t agku,
-               GHashTable * agk)
-{
-    GList* list;
-    element_t pow;
-    drevo_prv_item_t* item;
-    
-    element_init_same_as(pow, agku);
-    list = g_hash_table_get_keys(prv -> sk);
-
-    for (GList* p = list; p!=NULL; p = p -> next)
+    g_queue_push_tail(queue, cph->p);
+    element_init_G1(mid, pub->p);
+    while(!g_queue_is_empty(queue))
     {
-        item = g_hash_table_lookup(prv -> sk, p -> data);
-        if (!strcmp(p -> data, attribute))
+        bswabe_policy_t* root;
+        root = g_queue_pop_head(queue);
+        for (int i = 0; i < root->children->len; i++)
+            g_queue_push_tail(queue, g_ptr_array_index(root->children, i));
+        if (!root->children->len && !strcmp(attribute, root->attr))
         {
-            element_invert(pow, agku);            
+            item = root->cph;
+            element_pow_zn(mid, item->D1, uk->uk2);
+            element_mul(item->C1, item->C1, mid);
+            element_pow_zn(item->D1, item->D1, uk->uk1);
         }
-        else
-        {
-            element_invert(pow, 
-                *((element_t*)g_hash_table_lookup(agk, p -> data)));
-        }
-
-        element_pow_zn(item -> k1, item -> k1, pow);
     }
-    element_clear(pow);
-    g_list_free(list);
-}
 
-
-void
-drevo_ctupdate_policy( bswabe_policy_t* p, 
-                       drevo_pub_t* pub, 
-                       element_t e,
-                       element_t z,
-                       drevo_mid_value1* apk_list)
-{
-	int i;
-	element_t r;
-	element_t t;
-	element_t h;
-    bswabe_polynomial_t* zi;
-	
-	element_init_same_as(r, e);
-	element_init_same_as(t, e);
-	element_init_same_as(h, z);
-
-	p->q = rand_poly(p->k - 1, e);
-    zi = rand_poly(p->k - 1, z);
-	if( p->children->len == 0 )
-	{
-        drevo_cph_item_t* item;
-		element_t ri, mGT, mG1;
-        drevo_apk_t* apk;
-
-        item = p -> cph;
-        apk = g_hash_table_lookup(apk_list -> apk, p -> attr);
-        
-        element_init_Zr(ri, pub -> p);
-        element_init_GT(mGT, pub -> p);
-        element_init_G1(mG1, pub -> p);
-        element_random(ri);      
-        element_pow2_zn(mGT, pub -> egg, 
-            p -> q -> coef[0], apk -> egg_alpha, ri);
-        element_mul(item -> C1, item -> C1, mGT);
-
-        element_pow_zn(mG1, pub -> g, ri);
-        element_invert(mG1, mG1);
-
-        element_mul(item -> C2, item -> C2, mG1);
-
-        element_pow2_zn(mG1, apk -> gy, ri, pub -> g, zi -> coef[i]);
-
-        element_mul(item ->C3, item -> C3, mG1);
-
-        element_from_string(mG1, p -> attr);
-        element_pow_zn(mG1, mG1, ri);
-        element_mul(item -> C4, item -> C4, mG1);
-
-        if (!strcmp(p -> attr, apk_list -> attribute))
-            element_pow_zn(item -> C4, item -> C4, apk_list -> agku);
-        else
-            element_pow_zn(item -> C4, item -> C4, 
-                *((element_t *)g_hash_table_lookup(apk_list -> agk, p -> attr)));
-        element_clear(ri);
-        element_clear(mGT);
-        element_clear(mG1);
-        
-	}
-	else
-		for( i = 0; i < p->children->len; i++ )
-		{
-			element_set_si(r, i + 1);
-			eval_poly(t, p->q, r);
-            eval_poly(h, zi, r);
-			drevo_fill_policy(g_ptr_array_index(p->children, i), pub, t, h, apk_list);
-		}
-	free_polynomial(p->q);
-	free_polynomial(zi);
-	element_clear(r);
-	element_clear(t);
-	element_clear(h);
-	
-}
-
-void 
-drevo_ctupdate(drevo_cph_t* cph, 
-               drevo_pub_t* pub,
-               char *attribute,
-               element_t agku,
-               GHashTable* agk,
-               GHashTable* apk)
-{
-    element_t s, z, mid;
-    drevo_mid_value1 value;
-    
-    value.pub = pub;
-    value.agk = agk;
-    value.agk = &agku;
-    value.apk = apk;
-    element_init_Zr(s, pub -> p);
-    element_init_Zr(z, pub -> p);
-    element_init_GT(mid, pub -> p);
-    element_random(s);
-    element_set0(z);
-    element_pow_zn(mid, pub -> egg, s);
-    element_mul(cph -> C0, cph -> C0, mid);
-    drevo_ctupdate_policy(cph -> policy, pub, s, z, &value);
-    element_clear(s);
-    element_clear(z);
+    element_clear(mid);
+    g_queue_clear(queue);
 }

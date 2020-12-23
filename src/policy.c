@@ -421,7 +421,7 @@ lagrange_coef( element_t r, GArray* s, int i )
 
 
 
-void
+int
 dec_internal_flatten( element_t r, 
 					  element_t exp,
 					  bswabe_policy_t* p,
@@ -429,6 +429,7 @@ dec_internal_flatten( element_t r,
 					  void* pub,
 					  dec_leaf leaf_func)
 {
+	int res;
 	int i;
 	element_t t;
 	element_t expnew;
@@ -441,15 +442,17 @@ dec_internal_flatten( element_t r,
 	{
  		lagrange_coef(t, p->satl, g_array_index(p->satl, int, i));
 		element_mul(expnew, exp, t); /* num_muls++; */
-		dec_node_flatten(r, expnew, g_ptr_array_index
+		res = dec_node_flatten(r, expnew, g_ptr_array_index
 										 (p->children, g_array_index(p->satl, int, i) - 1), prv, pub, leaf_func);
+		if(res)break;
 	}
 
 	element_clear(t);
 	element_clear(expnew);
+	return res;
 }
 
-void
+int
 dec_node_flatten( element_t r, 
 				  element_t exp,
 				  bswabe_policy_t* p,
@@ -457,14 +460,17 @@ dec_node_flatten( element_t r,
 				  void* pub,
 				  dec_leaf leaf_func)
 {
+	int res;
+	res = 0;
 	assert(p->satisfiable);
 	if( p->children->len == 0 )
-		leaf_func(r, exp, p, prv, pub);
+		res = leaf_func(r, exp, p, prv, pub);
 	else
-		dec_internal_flatten(r, exp, p, prv, pub, leaf_func);
+		res = dec_internal_flatten(r, exp, p, prv, pub, leaf_func);
+	return res;
 }
 
-void
+int
 dec_flatten( element_t r, 
 			 bswabe_policy_t* p, 
 			 void* prv, 
@@ -472,6 +478,7 @@ dec_flatten( element_t r,
              pairing_t pair,
 			 dec_leaf leaf_func)
 {
+	int res;
 	element_t one;
 
 	element_init_Zr(one, pair);
@@ -480,9 +487,11 @@ dec_flatten( element_t r,
 	element_set1(r);
 	// element_set0(r);
 
-	dec_node_flatten(r, one, p, prv, pub, leaf_func);
+	res = dec_node_flatten(r, one, p, prv, pub, leaf_func);
 
 	element_clear(one);
+
+	return res;
 }
 
 void free_polynomial(bswabe_polynomial_t * q)

@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2020-12-05 17:23:26
+ * @LastEditTime: 2020-12-23 10:21:49
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /cpabe-hit/include/policy.h
+ */
 #ifndef POLICY_H
 #define POLICY_H
 #include <pbc.h>
@@ -38,7 +46,7 @@ typedef struct
 }
 bswabe_policy_t;
 
-typedef void (*dec_leaf)(element_t r, 
+typedef int (*dec_leaf)(element_t r, 
                          element_t exp, 
                          bswabe_policy_t *p,
                          void * prv,
@@ -67,8 +75,8 @@ void pick_sat_min_leaves( bswabe_policy_t* p );
 void q_sort(int *c, bswabe_policy_t * p);
 int cmp2int(const void *a, const void *b);
 void lagrange_coef( element_t r, GArray* s, int i );
-void dec_internal_flatten( element_t r, element_t exp, bswabe_policy_t* p, void* prv, void* pub, dec_leaf leaf_func);
-void dec_node_flatten( element_t r, element_t exp, bswabe_policy_t* p, void* prv, void* pub, dec_leaf leaf_func);
-void dec_flatten( element_t r, bswabe_policy_t* p, void* prv, void* pub, pairing_t pair, dec_leaf leaf_func);
+int dec_internal_flatten( element_t r, element_t exp, bswabe_policy_t* p, void* prv, void* pub, dec_leaf leaf_func);
+int dec_node_flatten( element_t r, element_t exp, bswabe_policy_t* p, void* prv, void* pub, dec_leaf leaf_func);
+int dec_flatten( element_t r, bswabe_policy_t* p, void* prv, void* pub, pairing_t pair, dec_leaf leaf_func);
 void free_polynomial(bswabe_polynomial_t * q);
 #endif

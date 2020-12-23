@@ -1,5 +1,13 @@
-#ifndef REVOCATION_H
-#define REVOCATION_H
+/*
+ * @Author: your name
+ * @Date: 2020-12-17 09:30:46
+ * @LastEditTime: 2020-12-20 20:12:22
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /cpabe-hit/include/drevocation/private.h
+ */
+#ifndef DREVOCATION_H
+#define DREVOCATION_H
 #include <math.h>
 #include "policy.h"
 #include <pbc.h>
@@ -7,88 +15,53 @@
 #include <stdarg.h>
 
 typedef struct {
-    char *pairing_desc;
+    char * pairing_desc;
     pairing_t p;
     element_t g;
-    element_t egg;
-    int AAs;
+    element_t g_a;
+    element_t g_beta;
+    element_t g_beta_invert;
+    element_t egg_alpha;
 } drevo_pub_t;
 
 typedef struct {
     element_t alpha;
-    element_t y;
-} drevo_ask_t;
+    element_t beta;
+    element_t gamma;
+    element_t a;
+    GHashTable* Vx;
+} drevo_msk_t;
 
 typedef struct {
-    element_t egg_alpha;
-    element_t gy;
-} drevo_apk_t;
+    char *attribute;
+    element_t pk1;
+    element_t pk2;
+} drevo_pkx_t;
 
 typedef struct {
-    element_t k0;
-    element_t k1;
-} drevo_prv_item_t;
-
-typedef struct {
-    int gid;
-    GHashTable * sk;
-    GPtrArray* attributes;
+    GPtrArray* attrs;
+    element_t K;
+    element_t L;
+    GHashTable* Kx;
 } drevo_prv_t;
 
 typedef struct {
-    element_t kek_j;
-    int index;
-} drevo_kek_node_t;
-
-typedef struct {
-    GNode * tree;
-    char *attribute;
-    char *aid;
-} drevo_kek_tree_t;
-
-typedef struct {
     element_t C1;
-    element_t C2;
-    element_t C3;
-    element_t C4;
-
+    element_t D1;
+    element_t D2;
 } drevo_cph_item_t;
 
 typedef struct {
-    char* policy_desc;
-    bswabe_policy_t * policy;
-    element_t C0;
+    element_t C;
+    element_t C1;
+    char *policy;
+    bswabe_policy_t* p;
 } drevo_cph_t;
 
-typedef struct {
-    char *attr;
-    int gid;
-    GHashTable* tk;
-    GPtrArray* attributes;
-} drevo_tk_t;
 
 typedef struct {
-    element_t z;
-} drevo_rk_t;
-
-typedef struct {
-    drevo_pub_t* pub;
-    GHashTable *agk;
-    drevo_prv_t* prv;
-} drevo_mid_value;
-
-typedef struct {
-    drevo_pub_t* pub;
-    GHashTable *agk;
-    char* attribute;
-    element_t* agku;
-    GHashTable* apk;
-} drevo_mid_value1;
-
-typedef struct {
-    char* policy;
-    element_t C0;
-    element_t egg_s_z;
-} drevo_cph_out_t;
+    element_t uk1;
+    element_t uk2;
+} drevo_uk_t;
 
 #endif

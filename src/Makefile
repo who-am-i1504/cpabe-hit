@@ -103,7 +103,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_main_OBJECTS = main.$(OBJEXT) common.$(OBJEXT) \
 	policy_lang.$(OBJEXT) policy.$(OBJEXT) vector.$(OBJEXT) \
-	core.$(OBJEXT) dcpabe.$(OBJEXT) revocation.$(OBJEXT)
+	core.$(OBJEXT) dcpabe.$(OBJEXT) revocation.$(OBJEXT) \
+	drevocation.$(OBJEXT) dacmacs.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_$(V))
@@ -126,7 +127,8 @@ DEFAULT_INCLUDES = -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/common.Po ./$(DEPDIR)/core.Po \
-	./$(DEPDIR)/dcpabe.Po ./$(DEPDIR)/main.Po \
+	./$(DEPDIR)/dacmacs.Po ./$(DEPDIR)/dcpabe.Po \
+	./$(DEPDIR)/drevocation.Po ./$(DEPDIR)/main.Po \
 	./$(DEPDIR)/policy.Po ./$(DEPDIR)/policy_lang.Po \
 	./$(DEPDIR)/revocation.Po ./$(DEPDIR)/vector.Po
 am__mv = mv -f
@@ -297,7 +299,7 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AUTOMAKE_OPTIONS = foreign
-main_SOURCES = main.c common.c policy_lang.c policy.c vector.c universe/core.c decentral/dcpabe.c revocation/revocation.c
+main_SOURCES = main.c common.c policy_lang.c policy.c vector.c universe/core.c decentral/dcpabe.c revocation/revocation.c drevocation/drevocation.c dacmacs/dacmacs.c
 INCLUDES = -I../include -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/pbc -I/usr/local/include/pbc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -410,7 +412,9 @@ distclean-compile:
 
 include ./$(DEPDIR)/common.Po # am--include-marker
 include ./$(DEPDIR)/core.Po # am--include-marker
+include ./$(DEPDIR)/dacmacs.Po # am--include-marker
 include ./$(DEPDIR)/dcpabe.Po # am--include-marker
+include ./$(DEPDIR)/drevocation.Po # am--include-marker
 include ./$(DEPDIR)/main.Po # am--include-marker
 include ./$(DEPDIR)/policy.Po # am--include-marker
 include ./$(DEPDIR)/policy_lang.Po # am--include-marker
@@ -485,6 +489,34 @@ revocation.obj: revocation/revocation.c
 #	$(AM_V_CC)source='revocation/revocation.c' object='revocation.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o revocation.obj `if test -f 'revocation/revocation.c'; then $(CYGPATH_W) 'revocation/revocation.c'; else $(CYGPATH_W) '$(srcdir)/revocation/revocation.c'; fi`
+
+drevocation.o: drevocation/drevocation.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT drevocation.o -MD -MP -MF $(DEPDIR)/drevocation.Tpo -c -o drevocation.o `test -f 'drevocation/drevocation.c' || echo '$(srcdir)/'`drevocation/drevocation.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/drevocation.Tpo $(DEPDIR)/drevocation.Po
+#	$(AM_V_CC)source='drevocation/drevocation.c' object='drevocation.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o drevocation.o `test -f 'drevocation/drevocation.c' || echo '$(srcdir)/'`drevocation/drevocation.c
+
+drevocation.obj: drevocation/drevocation.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT drevocation.obj -MD -MP -MF $(DEPDIR)/drevocation.Tpo -c -o drevocation.obj `if test -f 'drevocation/drevocation.c'; then $(CYGPATH_W) 'drevocation/drevocation.c'; else $(CYGPATH_W) '$(srcdir)/drevocation/drevocation.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/drevocation.Tpo $(DEPDIR)/drevocation.Po
+#	$(AM_V_CC)source='drevocation/drevocation.c' object='drevocation.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o drevocation.obj `if test -f 'drevocation/drevocation.c'; then $(CYGPATH_W) 'drevocation/drevocation.c'; else $(CYGPATH_W) '$(srcdir)/drevocation/drevocation.c'; fi`
+
+dacmacs.o: dacmacs/dacmacs.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dacmacs.o -MD -MP -MF $(DEPDIR)/dacmacs.Tpo -c -o dacmacs.o `test -f 'dacmacs/dacmacs.c' || echo '$(srcdir)/'`dacmacs/dacmacs.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/dacmacs.Tpo $(DEPDIR)/dacmacs.Po
+#	$(AM_V_CC)source='dacmacs/dacmacs.c' object='dacmacs.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dacmacs.o `test -f 'dacmacs/dacmacs.c' || echo '$(srcdir)/'`dacmacs/dacmacs.c
+
+dacmacs.obj: dacmacs/dacmacs.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dacmacs.obj -MD -MP -MF $(DEPDIR)/dacmacs.Tpo -c -o dacmacs.obj `if test -f 'dacmacs/dacmacs.c'; then $(CYGPATH_W) 'dacmacs/dacmacs.c'; else $(CYGPATH_W) '$(srcdir)/dacmacs/dacmacs.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/dacmacs.Tpo $(DEPDIR)/dacmacs.Po
+#	$(AM_V_CC)source='dacmacs/dacmacs.c' object='dacmacs.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dacmacs.obj `if test -f 'dacmacs/dacmacs.c'; then $(CYGPATH_W) 'dacmacs/dacmacs.c'; else $(CYGPATH_W) '$(srcdir)/dacmacs/dacmacs.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -621,7 +653,9 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/common.Po
 	-rm -f ./$(DEPDIR)/core.Po
+	-rm -f ./$(DEPDIR)/dacmacs.Po
 	-rm -f ./$(DEPDIR)/dcpabe.Po
+	-rm -f ./$(DEPDIR)/drevocation.Po
 	-rm -f ./$(DEPDIR)/main.Po
 	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
@@ -674,7 +708,9 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/common.Po
 	-rm -f ./$(DEPDIR)/core.Po
+	-rm -f ./$(DEPDIR)/dacmacs.Po
 	-rm -f ./$(DEPDIR)/dcpabe.Po
+	-rm -f ./$(DEPDIR)/drevocation.Po
 	-rm -f ./$(DEPDIR)/main.Po
 	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
