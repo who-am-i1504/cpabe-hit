@@ -1,12 +1,13 @@
 /*
  * @Author: your name
  * @Date: 2020-12-17 16:59:45
- * @LastEditTime: 2020-12-17 17:05:07
+ * @LastEditTime: 2020-12-25 15:18:30
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/include/vector.h
  */
-
+#ifndef VECTOR_H
+#define VECTOR_H
 #include "policy.h"
 
 typedef enum{
@@ -74,3 +75,18 @@ void vector_e_mul(element_t r,
 
 void printf_vector(bswabe_polynomial_t * p);
 
+bswabe_polynomial_t*
+random_vector_by_x1_x2_x3( bswabe_polynomial_t* x1,
+                           bswabe_polynomial_t* x2,
+                           bswabe_polynomial_t* x3,
+                           element_t c1,
+                           element_t c2,
+                           element_t c3);
+
+bswabe_polynomial_t*
+random_vector_by_x1_x2( bswabe_polynomial_t* x1,
+                        bswabe_polynomial_t* x2,
+                        element_t c1,
+                        element_t c2);
+
+#endif

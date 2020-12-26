@@ -61,6 +61,7 @@ compile
 *.mod*
 *.cmd
 .tmp_versions/
+.history/
 modules.order
 Module.symvers
 Mkfile.old

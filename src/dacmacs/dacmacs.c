@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-22 15:33:44
- * @LastEditTime: 2020-12-23 20:05:53
+ * @LastEditTime: 2020-12-25 11:05:19
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/src/dacmacs/dacmacs.c
@@ -433,8 +433,7 @@ dacmacs_decrypt(dacmacs_cph_t* cph,
                 element_t m)
 {
     int res;
-    element_t dp, di, pow, mul1, mul2;
-    GList* list;
+    element_t dp, di, mul1, mul2;
     dacmacs_prv_item_t* prv_item;
     
     res = 0;
@@ -450,7 +449,7 @@ dacmacs_decrypt(dacmacs_cph_t* cph,
     }
     element_init_GT(dp, pub->p);
     element_init_GT(di, pub->p);
-    element_init_Zr(pow, pub->p);
+    // element_init_Zr(pow, pub->p);
     element_init_GT(mul1, pub->p);
     element_init_GT(mul2, pub->p);
     element_init_GT(m, pub->p);
@@ -496,7 +495,7 @@ dacmacs_destory:
     element_clear(di);
     element_clear(mul1);
     element_clear(mul2);
-    element_clear(pow);
+    // element_clear(pow);
 
     return res;
 }

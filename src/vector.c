@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-17 17:04:03
- * @LastEditTime: 2020-12-17 17:09:38
+ * @LastEditTime: 2020-12-24 16:35:25
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/src/vector.c
@@ -363,4 +363,53 @@ void printf_vector(bswabe_polynomial_t * p)
 {
     for (int i = 0; i < p -> deg; i ++)
         element_printf("%B\n", p -> coef[i]);
+}
+
+bswabe_polynomial_t*
+random_vector_by_x1_x2_x3( bswabe_polynomial_t* x1,
+                           bswabe_polynomial_t* x2,
+                           bswabe_polynomial_t* x3,
+                           element_t c1,
+                           element_t c2,
+                           element_t c3)
+{
+    bswabe_polynomial_t* m1;
+    bswabe_polynomial_t* m2;
+    bswabe_polynomial_t* m3;
+
+    m1 = vector_duplicate(x1);
+    m2 = vector_duplicate(x2);
+    m3 = vector_duplicate(x3);
+
+    element_random(c1);
+    element_random(c2);
+    element_random(c3);
+
+    vector_mul_element(m1, m1, c1);
+    vector_mul_element(m2, m2, c2);
+    vector_mul_element(m3, m3, c3);
+    vector_add_out(m1, m1, m2);
+    vector_add_out(m1, m1, m2);
+    free_polynomial(m2);
+    free_polynomial(m3);
+    return m1;
+}
+
+bswabe_polynomial_t*
+random_vector_by_x1_x2( bswabe_polynomial_t* x1,
+                        bswabe_polynomial_t* x2,
+                        element_t c1,
+                        element_t c2)
+{
+    bswabe_polynomial_t* m1;
+    bswabe_polynomial_t* m2;
+    m1 = vector_duplicate(x1);
+    m2 = vector_duplicate(x2);
+    element_random(c1);
+    element_random(c2); 
+    vector_mul_element(m1, m1, c1);
+    vector_mul_element(m2, m2, c2);
+    vector_add_out(m1, m1, m2);
+    free_polynomial(m2);
+    return m1;
 }

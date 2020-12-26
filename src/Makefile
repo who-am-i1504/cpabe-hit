@@ -104,7 +104,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_main_OBJECTS = main.$(OBJEXT) common.$(OBJEXT) \
 	policy_lang.$(OBJEXT) policy.$(OBJEXT) vector.$(OBJEXT) \
 	core.$(OBJEXT) dcpabe.$(OBJEXT) revocation.$(OBJEXT) \
-	drevocation.$(OBJEXT) dacmacs.$(OBJEXT)
+	drevocation.$(OBJEXT) dacmacs.$(OBJEXT) drurevo.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_$(V))
@@ -128,9 +128,10 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/common.Po ./$(DEPDIR)/core.Po \
 	./$(DEPDIR)/dacmacs.Po ./$(DEPDIR)/dcpabe.Po \
-	./$(DEPDIR)/drevocation.Po ./$(DEPDIR)/main.Po \
-	./$(DEPDIR)/policy.Po ./$(DEPDIR)/policy_lang.Po \
-	./$(DEPDIR)/revocation.Po ./$(DEPDIR)/vector.Po
+	./$(DEPDIR)/drevocation.Po ./$(DEPDIR)/drurevo.Po \
+	./$(DEPDIR)/main.Po ./$(DEPDIR)/policy.Po \
+	./$(DEPDIR)/policy_lang.Po ./$(DEPDIR)/revocation.Po \
+	./$(DEPDIR)/vector.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -299,7 +300,7 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AUTOMAKE_OPTIONS = foreign
-main_SOURCES = main.c common.c policy_lang.c policy.c vector.c universe/core.c decentral/dcpabe.c revocation/revocation.c drevocation/drevocation.c dacmacs/dacmacs.c
+main_SOURCES = main.c common.c policy_lang.c policy.c vector.c universe/core.c decentral/dcpabe.c revocation/revocation.c drevocation/drevocation.c dacmacs/dacmacs.c drurevo/drurevo.c
 INCLUDES = -I../include -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/pbc -I/usr/local/include/pbc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -415,6 +416,7 @@ include ./$(DEPDIR)/core.Po # am--include-marker
 include ./$(DEPDIR)/dacmacs.Po # am--include-marker
 include ./$(DEPDIR)/dcpabe.Po # am--include-marker
 include ./$(DEPDIR)/drevocation.Po # am--include-marker
+include ./$(DEPDIR)/drurevo.Po # am--include-marker
 include ./$(DEPDIR)/main.Po # am--include-marker
 include ./$(DEPDIR)/policy.Po # am--include-marker
 include ./$(DEPDIR)/policy_lang.Po # am--include-marker
@@ -517,6 +519,20 @@ dacmacs.obj: dacmacs/dacmacs.c
 #	$(AM_V_CC)source='dacmacs/dacmacs.c' object='dacmacs.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dacmacs.obj `if test -f 'dacmacs/dacmacs.c'; then $(CYGPATH_W) 'dacmacs/dacmacs.c'; else $(CYGPATH_W) '$(srcdir)/dacmacs/dacmacs.c'; fi`
+
+drurevo.o: drurevo/drurevo.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT drurevo.o -MD -MP -MF $(DEPDIR)/drurevo.Tpo -c -o drurevo.o `test -f 'drurevo/drurevo.c' || echo '$(srcdir)/'`drurevo/drurevo.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/drurevo.Tpo $(DEPDIR)/drurevo.Po
+#	$(AM_V_CC)source='drurevo/drurevo.c' object='drurevo.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o drurevo.o `test -f 'drurevo/drurevo.c' || echo '$(srcdir)/'`drurevo/drurevo.c
+
+drurevo.obj: drurevo/drurevo.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT drurevo.obj -MD -MP -MF $(DEPDIR)/drurevo.Tpo -c -o drurevo.obj `if test -f 'drurevo/drurevo.c'; then $(CYGPATH_W) 'drurevo/drurevo.c'; else $(CYGPATH_W) '$(srcdir)/drurevo/drurevo.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/drurevo.Tpo $(DEPDIR)/drurevo.Po
+#	$(AM_V_CC)source='drurevo/drurevo.c' object='drurevo.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o drurevo.obj `if test -f 'drurevo/drurevo.c'; then $(CYGPATH_W) 'drurevo/drurevo.c'; else $(CYGPATH_W) '$(srcdir)/drurevo/drurevo.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -656,6 +672,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/dacmacs.Po
 	-rm -f ./$(DEPDIR)/dcpabe.Po
 	-rm -f ./$(DEPDIR)/drevocation.Po
+	-rm -f ./$(DEPDIR)/drurevo.Po
 	-rm -f ./$(DEPDIR)/main.Po
 	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po
@@ -711,6 +728,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/dacmacs.Po
 	-rm -f ./$(DEPDIR)/dcpabe.Po
 	-rm -f ./$(DEPDIR)/drevocation.Po
+	-rm -f ./$(DEPDIR)/drurevo.Po
 	-rm -f ./$(DEPDIR)/main.Po
 	-rm -f ./$(DEPDIR)/policy.Po
 	-rm -f ./$(DEPDIR)/policy_lang.Po

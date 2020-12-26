@@ -506,3 +506,22 @@ void free_polynomial(bswabe_polynomial_t * q)
 	}
 	free(q);
 }
+
+void
+bswabe_policy_free( bswabe_policy_t* p , func realse_cph)
+{
+	int i;
+
+	if( p->attr )
+	{
+		free(p->attr);
+		realse_cph(p->cph);
+	}
+
+	for( i = 0; i < p->children->len; i++ )
+		bswabe_policy_free(g_ptr_array_index(p->children, i), realse_cph);
+
+	g_ptr_array_free(p->children, 1);
+
+	free(p);
+}

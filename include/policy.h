@@ -18,6 +18,8 @@
 #define NUM_PRIMES 3
 #endif
 
+typedef void (*func)(void*);
+
 typedef struct
 {
 	int deg;
@@ -79,4 +81,6 @@ int dec_internal_flatten( element_t r, element_t exp, bswabe_policy_t* p, void* 
 int dec_node_flatten( element_t r, element_t exp, bswabe_policy_t* p, void* prv, void* pub, dec_leaf leaf_func);
 int dec_flatten( element_t r, bswabe_policy_t* p, void* prv, void* pub, pairing_t pair, dec_leaf leaf_func);
 void free_polynomial(bswabe_polynomial_t * q);
+void
+bswabe_policy_free( bswabe_policy_t* p , func realse_cph);
 #endif
