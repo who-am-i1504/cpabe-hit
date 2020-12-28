@@ -10,6 +10,7 @@
 #include "drevocation/core.h"
 #include "dacmacs/core.h"
 #include "drurevo/core.h"
+#include "drurevo/serialize.h"
 
 int main()
 {
@@ -73,24 +74,55 @@ int main()
 
     while(1)
     {
-
+    int offset;
     drur_capub_t* pub;
     drur_camsk_t* msk;
     drur_casetup(&pub, &msk, 100, 160);
+    element_printf("%B\n", msk->a);
+    
+    
+    GByteArray* msk_byte;
+    msk_byte = g_byte_array_new();
+    drur_serialize_camsk(msk_byte, msk);
+    drur_realse_camsk(msk);
+    offset = 0;
+    msk = drur_unserialize_camsk(pub, msk_byte, &offset);
+    g_byte_array_free(msk_byte, TRUE);
 
     drur_auth_t *a1;
     a1 = drur_aasetup(pub, a1_attrs, "a1");
     drur_auth_t *a2;
     a2 = drur_aasetup(pub, a2_attrs, "a2");
+
+    GByteArray* auth_byte;
+    auth_byte = g_byte_array_new();
+    drur_serialize_auth(auth_byte, a1);
+    drur_realse_auth(a1);
+    offset = 0;
+    a1 = drur_unserialize_auth(pub, auth_byte, &offset);
+    g_byte_array_free(auth_byte, TRUE);
+
+    auth_byte = g_byte_array_new();
+    drur_serialize_auth(auth_byte, a2);
+    drur_realse_auth(a2);
+    offset = 0;
+    a2 = drur_unserialize_auth(pub, auth_byte, &offset);
+    g_byte_array_free(auth_byte, TRUE);
+
     
     drur_user_t* user1;
+    char* aid;
     user1 = drur_user_register(pub, "user1", user_attributes);
     user1->sks = g_hash_table_new(g_str_hash, g_str_equal);
-
-    g_hash_table_insert(user1->sks, a1->aid,
+    user1->aids = g_ptr_array_new();
+    aid = strdup(a1->aid);
+    g_ptr_array_add(user1->aids, aid);
+    g_hash_table_insert(user1->sks, aid,
         drur_aakeygen(a1, pub, user1->cert, user1->attributes));
-
-    g_hash_table_insert(user1->sks, a2->aid, 
+    
+    aid = strdup(a2->aid);
+    g_ptr_array_add(user1->aids, aid);
+    g_hash_table_insert(user1->sks, aid, 
         drur_aakeygen(a2, pub, user1->cert, user1->attributes));
     
     user1->cask = drur_cakeygen(pub, msk, user1->attributes, user1->cert->id);
@@ -98,11 +130,16 @@ int main()
     drur_user_t* user2;
     user2 = drur_user_register(pub, "user2", user_attributes);
     user2->sks = g_hash_table_new(g_str_hash, g_str_equal);
+    user2->aids = g_ptr_array_new();
+    aid = strdup(a1->aid);
+    g_ptr_array_add(user2->aids, aid);
 
-    g_hash_table_insert(user2->sks, a1->aid, 
+    g_hash_table_insert(user2->sks, aid, 
         drur_aakeygen(a1, pub, user2->cert, user2->attributes));
 
-    g_hash_table_insert(user2->sks, a2->aid,
+    aid = strdup(a2->aid);
+    g_ptr_array_add(user2->aids, aid);
+    g_hash_table_insert(user2->sks, aid,
         drur_aakeygen(a2, pub, user2->cert, user2->attributes));
     
     user2->cask = drur_cakeygen(pub, msk, user2->attributes, user2->cert->id);
@@ -111,14 +148,42 @@ int main()
     user3 = drur_user_register(pub, "user3", user_attributes);
     user3->sks = g_hash_table_new(g_str_hash, g_str_equal);
 
-    g_hash_table_insert(user3->sks, a1->aid, 
+    user3->aids = g_ptr_array_new();
+    aid = strdup(a1->aid);
+    g_ptr_array_add(user3->aids, aid);
+
+    g_hash_table_insert(user3->sks, aid, 
         drur_aakeygen(a1, pub, user3->cert, user3->attributes));
 
-    g_hash_table_insert(user3->sks, a2->aid,
+    aid = strdup(a2->aid);
+    g_ptr_array_add(user3->aids, aid);
+    g_hash_table_insert(user3->sks, aid,
         drur_aakeygen(a2, pub, user3->cert, user3->attributes));
     
     user3->cask = drur_cakeygen(pub, msk, user3->attributes, user3->cert->id);
     
+    GByteArray* user_byte;
+    user_byte = g_byte_array_new();
+    drur_serialize_user(user_byte, user1);
+    drur_realse_user(user1);
+    offset = 0;
+    user1 = drur_unserialize_user(pub, user_byte, &offset);
+    g_byte_array_free(user_byte, TRUE);
+
+    user_byte = g_byte_array_new();
+    drur_serialize_user(user_byte, user2);
+    drur_realse_user(user2);
+    offset = 0;
+    user2 = drur_unserialize_user(pub, user_byte, &offset);
+    g_byte_array_free(user_byte, TRUE);
+
+    user_byte = g_byte_array_new();
+    drur_serialize_user(user_byte, user3);
+    drur_realse_user(user3);
+    offset = 0;
+    user3 = drur_unserialize_user(pub, user_byte, &offset);
+    g_byte_array_free(user_byte, TRUE);
+
     drur_auth_item_t auth_item1, auth_item2;
 
     auth_item1.pks = a1->auth_pk;
@@ -147,6 +212,15 @@ int main()
     g_array_append_val(revo_list, i);
 
     cph = drur_encrypt(pub, auth_pks, m, p, revo_list, 1);
+
+    GByteArray* cph_byte;
+    cph_byte = g_byte_array_new();
+    drur_serialize_cph(cph_byte, cph);
+    drur_realse_cph(cph);
+    offset = 0;
+    cph = drur_unserialize_cph(pub, cph_byte, &offset);
+    g_byte_array_free(cph_byte, TRUE);
+
     // g_array_free(revo_list, TRUE);
     element_t res;
 

@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-23 20:33:29
- * @LastEditTime: 2020-12-26 21:02:25
+ * @LastEditTime: 2020-12-27 17:04:17
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/include/serial.h
@@ -15,10 +15,11 @@
 #include <glib.h>
 #include <pbc.h>
 #include "policy.h"
+#include "vector.h"
 
 typedef void (*spln_cph)( GByteArray* b,
 			                void* cph );
-typedef void* (*uspln_cph)(void* pub,
+typedef void* (*uspln_cph)(pairing_t p,
                            GByteArray* b,
                            int *offset);
 
@@ -45,6 +46,20 @@ serialize_policy( GByteArray* b,
                   bswabe_policy_t* p, 
                   spln_cph serial_cph_func);
 
+bswabe_policy_t*
+unserialize_policy( pairing_t pairing, 
+					GByteArray* b, 
+					int* offset, 
+					uspln_cph userial_cph_func);
 
+
+void 
+serialize_polynomial(GByteArray* b, bswabe_polynomial_t* s);
+
+bswabe_polynomial_t*
+unserialize_polynomial(pairing_t* p, 
+					   element_type type, 
+					   GByteArray* b, 
+					   int *offset);
 
 #endif

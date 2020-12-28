@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-21 16:44:54
- * @LastEditTime: 2020-12-26 20:51:28
+ * @LastEditTime: 2020-12-27 21:55:33
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/src/drurevo/drurevo.c
@@ -292,6 +292,7 @@ drur_cakeygen(drur_capub_t* pub,
     prv->K_j = malloc(sizeof(element_t) * pub->rupub->m);
     prv->m = pub->rupub->m;
     prv->Kijx = g_hash_table_new(g_str_hash, g_str_equal);
+    prv->attributes = g_ptr_array_new();
     
     element_init_G1(prv->K0, pub->p);
     element_init_G1(prv->K1, pub->p);
@@ -329,6 +330,7 @@ drur_cakeygen(drur_capub_t* pub,
         element_t* kjx;
 
         attr = g_ptr_array_index(attributes, k);
+        attr = strdup(attr);
         kjx = malloc(sizeof(element_t)*2);
         
         element_init_G1(*kjx, pub->p);
@@ -348,6 +350,7 @@ drur_cakeygen(drur_capub_t* pub,
             *(kjx + 1), sx, pub->rupub->G, dx);
         
         g_hash_table_insert(prv->Kijx, attr, kjx);
+        g_ptr_array_add(prv->attributes, attr);
     }
 
     element_clear(sx);
@@ -624,6 +627,7 @@ drur_encrypt(drur_capub_t* pub,
 
         element_init_G1(*C2, pub->p);
         g_ptr_array_add(cph->aids, strdup(item->aid));
+        // printf("%s\n", item->aid);
         
         element_pow_zn(*C2, item->pks->g_beta_invert, npi);
         element_mul(egg_alpha, egg_alpha, item->pks->egg_alpha);
@@ -840,6 +844,7 @@ drur_dec_detail_ca(element_t r,
     item = p->cph;
     kjx = g_hash_table_lookup(prv->cask->Kijx, p->attr);
     element_pairing(s, prv->cask->K1, item->P0);
+    // element_printf("%B\t%B\n", *kjx, item->P1);
     element_pairing(t, *kjx, item->P1);
     element_mul(s, s, t);
     
@@ -1187,6 +1192,9 @@ drur_realse_ru_sk(drur_ru_sk_t* sk)
     }
     g_list_free(list);
     g_hash_table_destroy(sk->Kijx);
+    for (int i = 0; i < sk->attributes->len; i ++)
+        free(g_ptr_array_index(sk->attributes, i));
+    g_ptr_array_free(sk->attributes, 1);
     free(sk);
 }
 
@@ -1224,7 +1232,10 @@ drur_realse_user(drur_user_t* user)
     drur_realse_ru_sk(user->cask);
     for (int i = 0; i < user->attributes->len; i ++)
         free(g_ptr_array_index(user->attributes, i));
+    for (int i = 0; i < user->aids->len; i ++)
+        free(g_ptr_array_index(user->aids, i));
     g_ptr_array_free(user->attributes, TRUE);
+    g_ptr_array_free(user->aids, TRUE);
     free(user);
 }
 

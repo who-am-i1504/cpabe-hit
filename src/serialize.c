@@ -1,7 +1,7 @@
 /*
  * @Author: white john
  * @Date: 2020-12-23 20:33:38
- * @LastEditTime: 2020-12-23 21:41:20
+ * @LastEditTime: 2020-12-27 17:04:07
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/src/serical.c
@@ -117,7 +117,7 @@ serialize_policy( GByteArray* b,
 }
 
 bswabe_policy_t*
-unserialize_policy( void* pub, 
+unserialize_policy( pairing_t pairing, 
 					GByteArray* b, 
 					int* offset, 
 					uspln_cph userial_cph_func)
@@ -137,11 +137,48 @@ unserialize_policy( void* pub,
 	{
 		p->attr = unserialize_string(b, offset);
 		if (userial_cph_func!=NULL)
-			p->cph = userial_cph_func(pub, b, offset);
+			p->cph = userial_cph_func(pairing, b, offset);
 	}
 	else
 		for( i = 0; i < n; i++ )
-			g_ptr_array_add(p->children, unserialize_policy(pub, b, offset, userial_cph_func));
+			g_ptr_array_add(p->children, unserialize_policy(pairing, b, offset, userial_cph_func));
 
 	return p;
+}
+
+void 
+serialize_polynomial(GByteArray* b, bswabe_polynomial_t* s)
+{
+	serialize_uint32(b, (uint32_t)s->deg);
+	for (int i = 0; i < s->deg; i ++)
+		serialize_element(b, s->coef[i]);
+}
+
+bswabe_polynomial_t*
+unserialize_polynomial(pairing_t* p, 
+					   element_type type, 
+					   GByteArray* b, 
+					   int *offset)
+{
+	bswabe_polynomial_t* res;
+	res = malloc(sizeof(bswabe_polynomial_t));
+	res->deg = unserialize_uint32(b, offset);
+	res->coef = malloc(sizeof(element_t)*res->deg);
+	for (int i = 0; i < res->deg; i ++)
+	{
+		switch (type)
+		{
+		case Zr:
+			element_init_Zr(res->coef[i], p);
+			break;
+		case G1:
+			element_init_G1(res->coef[i], p);
+			break;
+		case GT:
+			element_init_GT(res->coef[i], p);
+			break;
+		}
+		unserialize_element(b, offset, res->coef[i]);
+	}
+	return res;
 }

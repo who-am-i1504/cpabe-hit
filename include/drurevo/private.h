@@ -1,7 +1,7 @@
 /*
  * @Author: white john
  * @Date: 2020-12-21 15:40:10
- * @LastEditTime: 2020-12-26 20:36:25
+ * @LastEditTime: 2020-12-27 16:35:31
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/include/drurevo/private.h
@@ -62,6 +62,7 @@ typedef struct {
     element_t K2;
     element_t *K_j;
     GHashTable* Kijx;
+    GPtrArray* attributes;
 } drur_ru_sk_t;
 
 typedef struct {
@@ -69,6 +70,7 @@ typedef struct {
     element_t gsk;
     drur_user_cert_t* cert;
     GHashTable* sks;
+    GPtrArray* aids;
     drur_ru_sk_t* cask;
     GPtrArray* attributes;
 } drur_user_t;
