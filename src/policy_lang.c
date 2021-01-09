@@ -2200,7 +2200,7 @@ void
 parse_attribute( GSList** l, char* a )
 {
 	if( !strchr(a, '=') )
-		*l = g_slist_append(*l, a);
+		*l = g_slist_append(*l, strdup(a));
 	else
 	{
 		int i;

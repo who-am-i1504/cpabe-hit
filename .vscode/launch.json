@@ -8,7 +8,7 @@
             "name": "gcc - 生成和调试活动文件",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "program": "${fileDirname}/server",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

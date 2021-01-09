@@ -22,41 +22,46 @@
  * these definitions.
  */
 
-namespace c_glib attr_auth
-namespace cpp attr_auth
-namespace d attr_auth // "shared" would collide with the eponymous D keyword.
-namespace dart attr_auth
-namespace java attr_auth
-namespace perl attr_auth
-namespace php attr_auth
-namespace haxe attr_auth
-namespace netstd attr_auth
+include "aa.thrift"
+include "ca.thrift"
 
-struct AuthParamter {
+namespace c_glib user
+namespace cpp user
+namespace d user // "shared" would collide with the eponymous D keyword.
+namespace dart user
+namespace java user
+namespace perl user
+namespace php user
+namespace haxe user
+namespace netstd user
+
+struct UserPrvKey {
+    1: list<string> aids
+    2: binary gpk
+    3: binary gsk
+    4: binary cert
+    5: map<string, aa.ARevoKey> sks
+    6: ca.URevoKey cask
+    7: list<string> attributes
+}
+
+struct AuthPK {
     1: string aid
-    2: binary auth_pk
-    3: binary auth_msk
-    4: map<string, binary> attr_pks
-    5: map<string, binary> attr_msks
-    6: list<string> attributes
+    2: binary pk
+    3: map<string, binary> attr_pks
+    4: list<string> attributes
 }
 
-struct ARevoKey {
-    1: string aid
-    2: binary K
-    3: binary L
-    4: binary R
-    5: map<string, binary> kx
-    6: list<string> attributes
+service User {
+    binary encrypt(1: binary pub, 
+                   2: list<AuthPK> attr_pks,
+                   3: string policy,
+                   4: list<i32> revo_list,
+                   5: i32 uindex,
+                   6: binary mes)
+    
+    binary decrypt(1: binary cph, 
+                   2: binary pub, 
+                   3: UserPrvKey prv)
 }
-
-service AAService {
-    AuthParamter aasetup(1: binary pub, 
-                         2: list<string> attributes, 
-                         3: string aid)
-
-    ARevoKey aakeygen(1: AuthParamter auth, 
-                      2: binary pub, 
-                      3: binary cert, 
-                      4: list<string> attribtues)
-}
+ 

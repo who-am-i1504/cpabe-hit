@@ -22,19 +22,19 @@
  * these definitions.
  */
 
-namespace c_glib center_authority
-namespace cpp center_authority
-namespace d center_authority // "shared" would collide with the eponymous D keyword.
-namespace dart center_authority
-namespace java center_authority
-namespace perl center_authority
-namespace php center_authority
-namespace haxe center_authority
-namespace netstd center_authority
+namespace c_glib ca
+namespace cpp ca
+namespace d ca // "shared" would collide with the eponymous D keyword.
+namespace dart ca
+namespace java ca
+namespace perl ca
+namespace php ca
+namespace haxe ca
+namespace netstd ca
 
 struct CAParamter {
     1: binary pub
-    2: optional binary msk
+    2: binary msk
 }
 
 struct UserRegister {
@@ -42,6 +42,7 @@ struct UserRegister {
     2: binary gsk
     3: binary UserCert
     4: list<string> attributes
+    5: i32 uid
 }
 
 struct URevoKey {
@@ -54,10 +55,11 @@ struct URevoKey {
     7: list<string> attributes
 }
 
-service CAService {
+service Center {
     CAParamter casetup(1: i32 N, 2: i32 bytesize)
-    UserRegister user_register( 1: string uid, 
-                                2: list<string> attributes)
+    UserRegister user_register( 1: binary pub,
+                                2: string uid, 
+                                3: list<string> attributes)
     URevoKey cakeygen(1: CAParamter param, 
                       2: list<string> attributes, 
                       3: i32 uid)

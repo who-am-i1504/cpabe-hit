@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-21 16:44:54
- * @LastEditTime: 2020-12-27 21:55:33
+ * @LastEditTime: 2021-01-07 11:13:22
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/src/drurevo/drurevo.c
@@ -880,12 +880,12 @@ drur_decrypt(drur_cph_t* cph,
 
     res = 0;
     check_sat(cph->p, prv->attributes);
-    pick_sat_min_leaves(cph->p);
     if (!cph->p->satisfiable)
     {
         raise_error("your attributes can't satify the policy.");
         return 1;
     }
+    pick_sat_min_leaves(cph->p);
     element_init_GT(dp, pub->p);
     element_init_GT(di, pub->p);
     element_init_GT(s, pub->p);

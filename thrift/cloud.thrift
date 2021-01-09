@@ -21,35 +21,21 @@
  * This Thrift file can be included by other Thrift files that want to share
  * these definitions.
  */
+namespace c_glib cloud
+namespace cpp cloud
+namespace d cloud // "shared" would collide with the eponymous D keyword.
+namespace dart cloud
+namespace java cloud
+namespace perl cloud
+namespace php cloud
+namespace haxe cloud
+namespace netstd cloud
 
-namespace c_glib user
-namespace cpp user
-namespace d user // "shared" would collide with the eponymous D keyword.
-namespace dart user
-namespace java user
-namespace perl user
-namespace php user
-namespace haxe user
-namespace netstd user
-
-struct UserPrvKey {
-    1: binary gpk
-    2: binary gsk
-    3: binary cert
-    4: map<string, binary> sks
-    5: binary cask
-    6: list<string> attributes
+service Cloud {
+    binary updatecph(1: binary cph,
+                     2: binary pub,
+                     3: binary cuk,
+                     4: i32    version,
+                     5: string attribute)
 }
-
-service UserService {
-    binary encrypt(1: binary pub, 
-                   2: list<binary> attr_pks,
-                   3: string policy,
-                   4: list<i32> revo_list,
-                   5: i32 uindex,
-                   6: binary mes)
-    
-    binary decrypt(1: binary cph, 
-                   2: binary pub, 
-                   3: UserPrvKey prv)
-}
+ 
