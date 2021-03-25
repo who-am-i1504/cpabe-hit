@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-31 15:19:45
- * @LastEditTime: 2021-01-08 10:22:11
+ * @LastEditTime: 2021-01-25 12:03:09
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /thrift-example/authority.c
@@ -264,13 +264,52 @@ main_aa_authority_handler_ukeygen(aaAuthorityIf *iface,
 
     (*_return)->attr_msk = g_byte_array_new();
     (*_return)->attr_pk = g_byte_array_new();
+    (*_return)->cuk = g_byte_array_new();
     
     drur_serialize_attr_pk((*_return)->attr_pk, apk);
     drur_seriallize_attr_msk((*_return)->attr_msk, amsk);
+    serialize_element((*_return)->cuk, amsk->cuk);
+    (*_return)->version = amsk->version;
+    
     drur_realse_attr_pk(apk);
     drur_realse_attr_msk(amsk);
     drur_realse_auth_msk(akey);
     drur_realse_capub(spub);
 
     return TRUE;
+}
+
+static gboolean
+main_aa_authority_handler_add_attribute(aaAuthorityIf *iface,
+                                        aaAttrPair    **_return,
+                                        GByteArray    **auth_msk,
+                                        GByteArray    *pub,
+                                        gchar         *attribute,
+                                        GError        **error)
+{
+    THRIFT_UNUSED_VAR (iface);
+    THRIFT_UNUSED_VAR (error);
+
+    *_return = g_object_new(
+        AA_TYPE_ATTR_PAIR,
+        NULL);
+    drur_capub_t *spub;
+    drur_auth_msk_t *akey;
+    drur_attr_pk_t* pk;
+    drur_attr_msk_t* pmsk;
+    int offset;
+
+    offset = 0;
+    spub = drur_unserialize_capub   (pub, &offset);
+    
+    offset = 0;
+    akey = drur_unserialize_auth_msk(pub, auth_msk, &offset);
+
+    drur_add_attribute(&pk, &pmsk, spub, akey, attribute);
+
+    (*_return)->attr_pk;
+
+    
+    return TRUE;
+    
 }

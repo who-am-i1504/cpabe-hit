@@ -1,7 +1,7 @@
 /*
  * @Author: white john
  * @Date: 2020-12-23 20:33:38
- * @LastEditTime: 2020-12-27 17:04:07
+ * @LastEditTime: 2021-01-25 14:33:46
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/src/serical.c
@@ -26,7 +26,7 @@ unserialize_uint32( GByteArray* b, int* offset )
 {
 	int i;
 	uint32_t r;
-
+	if ((*offset) + 4 > b->len) return 0;
 	r = 0;
 	for( i = 3; i >= 0; i-- )
 		r |= (b->data[(*offset)++])<<(i*8);
@@ -49,20 +49,21 @@ serialize_element( GByteArray* b, element_t e )
 	free(buf);
 }
 
-void
+int
 unserialize_element( GByteArray* b, int* offset, element_t e )
 {
 	uint32_t len;
 	unsigned char* buf;
 
 	len = unserialize_uint32(b, offset);
-
+	if (len + *(offset) > b->len) return 1;
 	buf = (unsigned char*) malloc(len);
 	memcpy(buf, b->data + *offset, len);
 	*offset += len;
 
 	element_from_bytes(e, buf);
 	free(buf);
+	return 0;
 }
 
 void
@@ -81,6 +82,10 @@ unserialize_string( GByteArray* b, int* offset )
 	s = g_string_sized_new(32);
 	while( 1 )
 	{
+		if (*offset >= b->len) {
+			g_string_free(s, 1);
+			return NULL; 
+		}
 		c = b->data[(*offset)++];
 		if( c && c != EOF )
 			g_string_append_c(s, c);
@@ -125,7 +130,8 @@ unserialize_policy( pairing_t pairing,
 	int i;
 	int n;
 	bswabe_policy_t* p;
-
+	if (*offset >= b->len) return NULL;
+	
 	p = (bswabe_policy_t*) malloc(sizeof(bswabe_policy_t));
 
 	p->k = (int) unserialize_uint32(b, offset);
@@ -136,6 +142,12 @@ unserialize_policy( pairing_t pairing,
 	if( n == 0 )
 	{
 		p->attr = unserialize_string(b, offset);
+		if (p->attr == NULL)
+		{
+			g_ptr_array_free(p->children, 1);
+			free(p);
+			return NULL;
+		}
 		if (userial_cph_func!=NULL)
 			p->cph = userial_cph_func(pairing, b, offset);
 	}

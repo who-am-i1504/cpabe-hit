@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-26 20:53:18
- * @LastEditTime: 2020-12-27 16:12:17
+ * @LastEditTime: 2021-02-16 15:43:38
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/include/drurevo/serialize.h
@@ -10,7 +10,8 @@
 #define DRUREVO_SERIALIZE_H
 #include "./private.h"
 #include "../serialize.h"
-
+#include "./core.h"
+#include "../policy.h"
 void
 drur_serialize_rupub(GByteArray* b,
                      drur_rupub_t* pub);

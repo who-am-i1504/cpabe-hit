@@ -1352,7 +1352,9 @@ enum _aaAttrPairProperties
 {
   PROP_AA_ATTR_PAIR_0,
   PROP_AA_ATTR_PAIR_ATTR_PK,
-  PROP_AA_ATTR_PAIR_ATTR_MSK
+  PROP_AA_ATTR_PAIR_ATTR_MSK,
+  PROP_AA_ATTR_PAIR_CUK,
+  PROP_AA_ATTR_PAIR_VERSION
 };
 
 /* reads a attr_pair object */
@@ -1448,6 +1450,41 @@ aa_attr_pair_read (ThriftStruct *object, ThriftProtocol *protocol, GError **erro
           xfer += ret;
         }
         break;
+      case 3:
+        if (ftype == T_STRING)
+        {
+          if (this_object->cuk != NULL)
+          {
+            g_free(this_object->cuk);
+            this_object->cuk = NULL;
+          }
+
+          if ((ret = thrift_protocol_read_binary (protocol, &data, &len, error)) < 0)
+            return -1;
+          xfer += ret;
+          this_object->cuk = g_byte_array_new();
+          g_byte_array_append (this_object->cuk, (guint8 *) data, (guint) len);
+          g_free (data);
+          this_object->__isset_cuk = TRUE;
+        } else {
+          if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
+            return -1;
+          xfer += ret;
+        }
+        break;
+      case 4:
+        if (ftype == T_I32)
+        {
+          if ((ret = thrift_protocol_read_i32 (protocol, &this_object->version, error)) < 0)
+            return -1;
+          xfer += ret;
+          this_object->__isset_version = TRUE;
+        } else {
+          if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
+            return -1;
+          xfer += ret;
+        }
+        break;
       default:
         if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
           return -1;
@@ -1497,6 +1534,26 @@ aa_attr_pair_write (ThriftStruct *object, ThriftProtocol *protocol, GError **err
   if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
     return -1;
   xfer += ret;
+  if ((ret = thrift_protocol_write_field_begin (protocol, "cuk", T_STRING, 3, error)) < 0)
+    return -1;
+  xfer += ret;
+  if ((ret = thrift_protocol_write_binary (protocol, this_object->cuk ? ((GByteArray *) this_object->cuk)->data : NULL, this_object->cuk ? ((GByteArray *) this_object->cuk)->len : 0, error)) < 0)
+    return -1;
+  xfer += ret;
+
+  if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
+    return -1;
+  xfer += ret;
+  if ((ret = thrift_protocol_write_field_begin (protocol, "version", T_I32, 4, error)) < 0)
+    return -1;
+  xfer += ret;
+  if ((ret = thrift_protocol_write_i32 (protocol, this_object->version, error)) < 0)
+    return -1;
+  xfer += ret;
+
+  if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
+    return -1;
+  xfer += ret;
   if ((ret = thrift_protocol_write_field_stop (protocol, error)) < 0)
     return -1;
   xfer += ret;
@@ -1531,6 +1588,18 @@ aa_attr_pair_set_property (GObject *object,
       self->__isset_attr_msk = TRUE;
       break;
 
+    case PROP_AA_ATTR_PAIR_CUK:
+      if (self->cuk != NULL)
+        g_byte_array_unref (self->cuk);
+      self->cuk = g_value_dup_boxed (value);
+      self->__isset_cuk = TRUE;
+      break;
+
+    case PROP_AA_ATTR_PAIR_VERSION:
+      self->version = g_value_get_int (value);
+      self->__isset_version = TRUE;
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -1555,6 +1624,14 @@ aa_attr_pair_get_property (GObject *object,
       g_value_set_boxed (value, self->attr_msk);
       break;
 
+    case PROP_AA_ATTR_PAIR_CUK:
+      g_value_set_boxed (value, self->cuk);
+      break;
+
+    case PROP_AA_ATTR_PAIR_VERSION:
+      g_value_set_int (value, self->version);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -1570,6 +1647,10 @@ aa_attr_pair_instance_init (aaAttrPair * object)
   object->__isset_attr_pk = FALSE;
   object->attr_msk = NULL;
   object->__isset_attr_msk = FALSE;
+  object->cuk = NULL;
+  object->__isset_cuk = FALSE;
+  object->version = 0;
+  object->__isset_version = FALSE;
 }
 
 static void 
@@ -1588,6 +1669,11 @@ aa_attr_pair_finalize (GObject *object)
   {
     thrift_string_free(tobject->attr_msk);
     tobject->attr_msk = NULL;
+  }
+  if (tobject->cuk != NULL)
+  {
+    thrift_string_free(tobject->cuk);
+    tobject->cuk = NULL;
   }
 }
 
@@ -1621,6 +1707,26 @@ aa_attr_pair_class_init (aaAttrPairClass * cls)
                          NULL,
                          G_TYPE_BYTE_ARRAY,
                          G_PARAM_READWRITE));
+
+  g_object_class_install_property
+    (gobject_class,
+     PROP_AA_ATTR_PAIR_CUK,
+     g_param_spec_boxed ("cuk",
+                         NULL,
+                         NULL,
+                         G_TYPE_BYTE_ARRAY,
+                         G_PARAM_READWRITE));
+
+  g_object_class_install_property
+    (gobject_class,
+     PROP_AA_ATTR_PAIR_VERSION,
+     g_param_spec_int ("version",
+                       NULL,
+                       NULL,
+                       G_MININT32,
+                       G_MAXINT32,
+                       0,
+                       G_PARAM_READWRITE));
 }
 
 GType

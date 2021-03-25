@@ -95,6 +95,10 @@ struct _aaAttrPair
   gboolean __isset_attr_pk;
   GByteArray * attr_msk;
   gboolean __isset_attr_msk;
+  GByteArray * cuk;
+  gboolean __isset_cuk;
+  gint32 version;
+  gboolean __isset_version;
 };
 typedef struct _aaAttrPair aaAttrPair;
 

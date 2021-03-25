@@ -53,6 +53,9 @@ struct ARevoKey {
 struct AttrPair {
     1: binary attr_pk
     2: binary attr_msk
+    3: binary cuk
+    4: i32 version
+
 }
 
 service Authority {

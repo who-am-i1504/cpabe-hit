@@ -43,6 +43,7 @@ struct UserRegister {
     3: binary UserCert
     4: list<string> attributes
     5: i32 uid
+    6: binary pub
 }
 
 struct URevoKey {

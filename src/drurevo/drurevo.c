@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-21 16:44:54
- * @LastEditTime: 2021-01-07 11:13:22
+ * @LastEditTime: 2021-01-22 17:10:43
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/src/drurevo/drurevo.c
@@ -273,6 +273,36 @@ drur_aasetup(drur_capub_t* pub,
     }
 
     return auth;
+}
+
+void
+drur_add_attribute(drur_attr_pk_t** pkx, 
+                   drur_attr_msk_t** vx, 
+                   drur_capub_t* pub,
+                   drur_auth_msk_t* pmsk,
+                   char* attr)
+{
+    element_t mid;
+    (*pkx) = malloc(sizeof(drur_attr_pk_t));
+    (*vx) = malloc(sizeof(drur_attr_msk_t));
+    (*pkx)->version = 0;
+    (*vx)->version = 0;
+    element_init_G1((*pkx)->pk, pub->p);
+    element_init_G1(mid, pub->p);
+    element_init_Zr((*vx)->vx, pub->p);
+    element_init_Zr((*vx)->auk, pub->p);
+    element_init_Zr((*vx)->kuk, pub->p);
+    element_init_Zr((*vx)->cuk, pub->p);
+    
+    element_set1((*vx)->auk);
+    element_set1((*vx)->kuk);
+    element_set1((*vx)->cuk);
+    element_random((*vx)->vx);
+    element_from_string((*pkx)->pk, attr);
+    element_pow_zn(mid, pub->g, (*vx)->vx);
+    element_mul((*pkx)->pk, (*pkx)->pk, pmsk->gamma);
+    
+    element_clear(mid);
 }
 
 drur_ru_sk_t* 
@@ -1058,6 +1088,7 @@ drur_cph_update(drur_cph_t* cph,
             if (!strcmp(cur->attr, attribute))
             {
                 item = cur->cph;
+                if (item->version < version)continue;
                 item->version = version;
                 // element_printf("%B\t%B\n", item->C3, cuk);
                 element_pow_zn(D_CUK, item->D2, cuk);

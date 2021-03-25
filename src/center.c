@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-31 15:19:45
- * @LastEditTime: 2021-01-07 20:23:54
+ * @LastEditTime: 2021-03-07 17:15:52
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /thrift-example/authority.c
@@ -196,10 +196,15 @@ main_ca_center_handler_user_register(caCenterIf     *iface,
     (*_return)->UserCert = g_byte_array_new();
     (*_return)->attributes = user->attributes;
     (*_return)->uid = user->cert->id;
+    
 
     serialize_element((*_return)->gpk, user->gpk);
     serialize_element((*_return)->gsk, user->gsk);
     drur_serialize_cert((*_return)->UserCert, user->cert);
+    GByteArray *b;
+    b = g_byte_array_new();    
+    drur_serialize_capub(b, spub);
+    (*_return)->pub = b;
     
     drur_realse_user_cert(user->cert);
     element_clear(user->gsk);

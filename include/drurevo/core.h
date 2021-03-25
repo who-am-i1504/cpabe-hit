@@ -1,7 +1,7 @@
 /*
  * @Author: white john
  * @Date: 2020-12-21 15:40:31
- * @LastEditTime: 2020-12-26 17:06:52
+ * @LastEditTime: 2021-01-22 17:10:57
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/include/drurevo/core.h
@@ -37,6 +37,13 @@ drur_auth_t *
 drur_aasetup(drur_capub_t* pub,
              GPtrArray* attributes,
              char* aid);
+
+void
+drur_add_attribute(drur_attr_pk_t** pkx, 
+                   drur_attr_msk_t** vx, 
+                   drur_capub_t* pub,
+                   drur_auth_msk_t* pmsk,
+                   char* attr);
 
 drur_ru_sk_t* 
 drur_cakeygen(drur_capub_t* pub,

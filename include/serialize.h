@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-23 20:33:29
- * @LastEditTime: 2020-12-27 17:04:17
+ * @LastEditTime: 2021-01-25 14:45:47
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/include/serial.h
@@ -32,7 +32,7 @@ unserialize_uint32( GByteArray* b, int* offset );
 void
 serialize_element( GByteArray* b, element_t e );
 
-void
+int
 unserialize_element( GByteArray* b, int* offset, element_t e );
 
 void

@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-01-08 15:57:15
- * @LastEditTime: 2021-01-08 16:47:52
+ * @LastEditTime: 2021-01-13 21:53:35
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /cpabe-hit/src/policy_service.c
@@ -66,11 +66,13 @@ main_policy_handler_parse_attributes(policyPolicyIf *iface,
 
     *_return = g_ptr_array_new();
  
-    for (GList* p = list; p != NULL; p = p->next)
+    for (GSList* p = list; p != NULL; p = p->next)
     {
+        if (!p->data)continue;
         g_ptr_array_add(*_return, p->data);
     }
     g_slist_free(list);
+    g_message("parse attribute!");
 
     return TRUE;
 }
@@ -84,5 +86,6 @@ main_policy_handler_parse_policy(policyPolicyIf     *iface,
     THRIFT_UNUSED_VAR(iface);
     THRIFT_UNUSED_VAR(error);
     *_return = parse_policy_lang(policy);
+    g_message("parse policy!");
     return TRUE;
 }

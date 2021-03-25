@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-12-31 15:19:45
- * @LastEditTime: 2021-01-07 11:16:24
+ * @LastEditTime: 2021-01-13 21:35:27
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /thrift-example/authority.c
@@ -314,7 +314,6 @@ main_user_authority_handler_decrypt(userUserIf     *iface,
     sprv->sks = transferSK(spub, prv->sks);
     
     offset = 0;
-    // sprv->cask = drur_unserialize_ru_sk(spub, prv->cask, &offset);
     sprv->cask = transferRUSK(spub, prv->cask);
     offset = 0;
     sprv->cert = drur_unserialize_cert(spub, prv->cert, &offset);
@@ -322,9 +321,7 @@ main_user_authority_handler_decrypt(userUserIf     *iface,
     sprv->attributes = g_ptr_array_new();
     for (int i = 0; i < prv->attributes->len; i ++)
         g_ptr_array_add(sprv->attributes, 
-            g_ptr_array_index(prv->attributes, i));
-    
-    sprv->aids = g_ptr_array_new();
+            strdup(g_ptr_array_index(prv->attributes, i)));
     
     if (!drur_decrypt(scph, spub, sprv, m))
     {
@@ -343,5 +340,5 @@ main_user_authority_handler_decrypt(userUserIf     *iface,
     
     g_message("user decryption!");
     
-    return TRUE;
+    return res;
 }

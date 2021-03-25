@@ -132,6 +132,7 @@ int main (void)
      g_message ("thrift_server_serve:%s",
                 error!=NULL ? error->message:"(null)");
      g_clear_error(&error);
+     error = NULL;
   }
 
   if (!thrift_multiplexed_processor_register_processor(processor,
@@ -141,6 +142,7 @@ int main (void)
      g_message ("thrift_server_serve:%s",
                 error!=NULL ? error->message:"(null)");
      g_clear_error(&error);
+     error = NULL;
   }
 
   if (!thrift_multiplexed_processor_register_processor(processor,
@@ -150,6 +152,7 @@ int main (void)
      g_message ("thrift_server_serve:%s",
                 error!=NULL ? error->message:"(null)");
      g_clear_error(&error);
+     error = NULL;
   }
   if (!thrift_multiplexed_processor_register_processor(processor,
       "CLOUD_AUTHORITY", cloud_processor,
@@ -158,6 +161,7 @@ int main (void)
      g_message ("thrift_server_serve:%s",
                 error!=NULL ? error->message:"(null)");
      g_clear_error(&error);
+     error = NULL;
   }
 
   if (!thrift_multiplexed_processor_register_processor(processor,
@@ -167,6 +171,7 @@ int main (void)
      g_message ("thrift_server_serve:%s",
                 error!=NULL ? error->message:"(null)");
      g_clear_error(&error);
+     error = NULL;
   }
   /* Create our server socket, which binds to the specified port and
      listens for client connections */
@@ -191,8 +196,7 @@ int main (void)
   /* Create the server itself */
   server =
     g_object_new (THRIFT_TYPE_SIMPLE_SERVER,
-                  "processor",                processor,
-                  "server_transport",         server_transport,
+                  "processor",                processor,               "server_transport",         server_transport,
                   "input_transport_factory",  transport_factory,
                   "output_transport_factory", transport_factory,
                   "input_protocol_factory",   protocol_factory,

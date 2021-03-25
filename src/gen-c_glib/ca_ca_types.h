@@ -58,6 +58,8 @@ struct _caUserRegister
   gboolean __isset_attributes;
   gint32 uid;
   gboolean __isset_uid;
+  GByteArray * pub;
+  gboolean __isset_pub;
 };
 typedef struct _caUserRegister caUserRegister;
 

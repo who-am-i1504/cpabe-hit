@@ -321,7 +321,8 @@ enum _caUserRegisterProperties
   PROP_CA_USER_REGISTER_GSK,
   PROP_CA_USER_REGISTER_USER_CERT,
   PROP_CA_USER_REGISTER_ATTRIBUTES,
-  PROP_CA_USER_REGISTER_UID
+  PROP_CA_USER_REGISTER_UID,
+  PROP_CA_USER_REGISTER_PUB
 };
 
 /* reads a user_register object */
@@ -490,6 +491,28 @@ ca_user_register_read (ThriftStruct *object, ThriftProtocol *protocol, GError **
           xfer += ret;
         }
         break;
+      case 6:
+        if (ftype == T_STRING)
+        {
+          if (this_object->pub != NULL)
+          {
+            g_free(this_object->pub);
+            this_object->pub = NULL;
+          }
+
+          if ((ret = thrift_protocol_read_binary (protocol, &data, &len, error)) < 0)
+            return -1;
+          xfer += ret;
+          this_object->pub = g_byte_array_new();
+          g_byte_array_append (this_object->pub, (guint8 *) data, (guint) len);
+          g_free (data);
+          this_object->__isset_pub = TRUE;
+        } else {
+          if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
+            return -1;
+          xfer += ret;
+        }
+        break;
       default:
         if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
           return -1;
@@ -582,6 +605,16 @@ ca_user_register_write (ThriftStruct *object, ThriftProtocol *protocol, GError *
   if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
     return -1;
   xfer += ret;
+  if ((ret = thrift_protocol_write_field_begin (protocol, "pub", T_STRING, 6, error)) < 0)
+    return -1;
+  xfer += ret;
+  if ((ret = thrift_protocol_write_binary (protocol, this_object->pub ? ((GByteArray *) this_object->pub)->data : NULL, this_object->pub ? ((GByteArray *) this_object->pub)->len : 0, error)) < 0)
+    return -1;
+  xfer += ret;
+
+  if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
+    return -1;
+  xfer += ret;
   if ((ret = thrift_protocol_write_field_stop (protocol, error)) < 0)
     return -1;
   xfer += ret;
@@ -635,6 +668,13 @@ ca_user_register_set_property (GObject *object,
       self->__isset_uid = TRUE;
       break;
 
+    case PROP_CA_USER_REGISTER_PUB:
+      if (self->pub != NULL)
+        g_byte_array_unref (self->pub);
+      self->pub = g_value_dup_boxed (value);
+      self->__isset_pub = TRUE;
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -671,6 +711,10 @@ ca_user_register_get_property (GObject *object,
       g_value_set_int (value, self->uid);
       break;
 
+    case PROP_CA_USER_REGISTER_PUB:
+      g_value_set_boxed (value, self->pub);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -692,6 +736,8 @@ ca_user_register_instance_init (caUserRegister * object)
   object->__isset_attributes = FALSE;
   object->uid = 0;
   object->__isset_uid = FALSE;
+  object->pub = NULL;
+  object->__isset_pub = FALSE;
 }
 
 static void 
@@ -720,6 +766,11 @@ ca_user_register_finalize (GObject *object)
   {
     g_ptr_array_unref (tobject->attributes);
     tobject->attributes = NULL;
+  }
+  if (tobject->pub != NULL)
+  {
+    thrift_string_free(tobject->pub);
+    tobject->pub = NULL;
   }
 }
 
@@ -782,6 +833,15 @@ ca_user_register_class_init (caUserRegisterClass * cls)
                        G_MAXINT32,
                        0,
                        G_PARAM_READWRITE));
+
+  g_object_class_install_property
+    (gobject_class,
+     PROP_CA_USER_REGISTER_PUB,
+     g_param_spec_boxed ("pub",
+                         NULL,
+                         NULL,
+                         G_TYPE_BYTE_ARRAY,
+                         G_PARAM_READWRITE));
 }
 
 GType
